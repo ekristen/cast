@@ -110,15 +110,17 @@ func init() {
 			Usage:   "Used to authenticate to the GitHub API",
 			EnvVars: []string{"GITHUB_TOKEN"},
 		},
-		&cli.StringFlag{
-			Name:  "ssh-host",
-			Usage: "Remote SSH Host",
-		},
-		&cli.IntFlag{
-			Name:  "ssh-port",
-			Usage: "Port of the Remote SSH Host",
-			Value: 22,
-		},
+		/*
+			&cli.StringFlag{
+				Name:  "ssh-host",
+				Usage: "Remote SSH Host",
+			},
+			&cli.IntFlag{
+				Name:  "ssh-port",
+				Usage: "Port of the Remote SSH Host",
+				Value: 22,
+			},
+		*/
 		&cli.BoolFlag{
 			Name:  "pre-release",
 			Usage: "Include pre-release versions as valid install targets",
