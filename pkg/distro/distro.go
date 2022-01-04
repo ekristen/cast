@@ -107,8 +107,6 @@ func New(ctx context.Context, distro string, version *string, includePreReleases
 
 	d.ctx = ctx
 
-	fmt.Println("githubToken", githubToken)
-
 	if githubToken != "" {
 		ts := oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: githubToken},
@@ -380,7 +378,11 @@ func (d *Distro) downloadReleaseAsset(url, filename, dir string) error {
 
 	d.log.WithField("filename", filename).Infof("downloading release file")
 
-	if err := utils.DownloadFile(url, dst, d.dlHttp, nil); err != nil {
+	headers := map[string]string{
+		"accept": "application/octet-stream",
+	}
+
+	if err := utils.DownloadFile(url, dst, d.dlHttp, headers); err != nil {
 		return err
 	}
 
