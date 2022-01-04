@@ -1,0 +1,15 @@
+base: sift
+modes:
+  - name: desktop
+    state: sift.desktop
+  - name: server
+    state: sift.server
+    default: true
+  - name: packages-only
+    state: sift.server
+    deprecated: true
+    replacement: server
+  - name: complete
+    state: sift.desktop
+    deprecated: true
+    replacement: desktop

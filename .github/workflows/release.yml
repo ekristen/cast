@@ -1,0 +1,59 @@
+name: release
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        if: github.event_name == 'pull_request'
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/checkout@v2
+        if: github.event_name == 'push'
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@main
+        with:
+          cosign-release: "v1.4.1"
+      - name: Setup Cosign
+        run: |
+          echo "${COSIGN_KEY}" > "$GITHUB_WORKSPACE/cosign.key"
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+      - name: Set GoReleaser Default Args
+        if: startsWith(github.ref, 'refs/tags/') == true
+        run: |
+          echo "GORELEASER_ARGS=" >> $GITHUB_ENV
+      - name: Set GoReleaser Options for Branch
+        if: startsWith(github.ref, 'refs/tags/') == false
+        run: |
+          echo "GORELEASER_ARGS=--snapshot" >> $GITHUB_ENV
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist ${{ env.GORELEASER_ARGS }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
