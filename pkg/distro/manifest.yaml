@@ -13,3 +13,7 @@ modes:
     state: sift.desktop
     deprecated: true
     replacement: desktop
+supported_os:
+  - id: ubuntu
+    release: 20.04
+    focal: focal

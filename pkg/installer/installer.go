@@ -2,9 +2,9 @@ package installer
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -81,11 +81,16 @@ func (i *Installer) Run() (err error) {
 
 	i.log.Info("running saltstack installer")
 	sinstaller := saltstack.New(sconfig)
-	if err := sinstaller.Run(); err != nil {
+	sinstaller.SetMode(saltstack.Package)
+
+	if err := sinstaller.Run(i.ctx); err != nil {
 		return err
 	}
 
 	i.command = sinstaller.GetBinary()
+	if i.command == "" {
+		return fmt.Errorf("unable to resolve salt binary to use")
+	}
 
 	i.log.Info("running cast installer")
 
@@ -169,25 +174,26 @@ func (i *Installer) runSaltstack() error {
 
 	i.log.Debugf("running command %s %s", i.command, args)
 
-	logFile, err := os.OpenFile(i.logFile, os.O_CREATE|os.O_RDWR, 0644)
+	logFile, err := os.OpenFile(i.logFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		i.log.WithError(err).Error("unable to open log file for writing")
 		return err
 	}
 	defer logFile.Close()
 
+	var out bytes.Buffer
+
 	cmd := exec.Command(i.command, args...)
+	cmd.Stdout = &out
 
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	stderr, _ := cmd.StderrPipe()
+	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		return err
 	}
 
-	cmd.Start()
+	scanner := bufio.NewScanner(stderr)
+
+	done := make(chan struct{})
 
 	go func() {
 		<-i.ctx.Done()
@@ -205,120 +211,149 @@ func (i *Installer) runSaltstack() error {
 		log.WithField("log", i.logFile).Info("log file location")
 	}()
 
-	inStateExecution := false
-	inStateFailure := false
-	inStateStartTime := ""
+	go func() {
+		inStateExecution := false
+		inStateFailure := false
+		inStateStartTime := ""
 
-	scanner := bufio.NewScanner(stderr)
-	for scanner.Scan() {
-		m := strings.TrimPrefix(scanner.Text(), "# ")
+		for scanner.Scan() {
+			m := strings.TrimPrefix(scanner.Text(), "# ")
 
-		_, err := logFile.Write([]byte(m))
-		if err != nil {
-			i.log.WithError(err).Warn("unable to write to log file")
+			/*
+				_, err := logFile.Write([]byte(m + "\n"))
+				if err != nil {
+					i.log.WithError(err).Warn("unable to write to log file")
+				}
+			*/
+
+			log := i.log.WithField("component", "saltstack")
+
+			if !inStateExecution {
+				if beginRegexp.MatchString(m) {
+					matches := beginRegexp.FindAllStringSubmatch(m, -1)
+
+					fields := logrus.Fields{
+						"state":      matches[0][1],
+						"time_start": matches[0][2],
+					}
+					inStateStartTime = matches[0][2]
+
+					log.WithFields(fields).Trace(m)
+
+					i.log.WithFields(fields).Info("running state")
+					inStateExecution = true
+				} else {
+					i.log.WithField("component", "saltstack").Trace(m)
+				}
+			} else {
+				if m == "" {
+					continue
+				}
+
+				if execRegexp.MatchString(m) {
+					matches := execRegexp.FindAllStringSubmatch(m, -1)
+					log.Trace(m)
+					i.log.Infof("Executing %s for %s", matches[0][1], matches[0][2])
+				} else if !resRegexp.MatchString(m) {
+					log.Trace(m)
+					if strings.HasSuffix(m, "Failure!") {
+						inStateFailure = true
+						i.log.Warnf("Result: %s", m)
+					} else {
+						i.log.Debugf("Result: %s", m)
+					}
+				} else if endRegexp.MatchString(m) {
+					matches := endRegexp.FindAllStringSubmatch(m, -1)
+
+					duration := matches[0][3]
+					if len(matches[0]) > 3 {
+						duration = matches[0][4]
+					}
+
+					fields := logrus.Fields{
+						"state":      matches[0][1],
+						"time_start": inStateStartTime,
+						"time_end":   matches[0][2],
+						"duration":   duration,
+					}
+
+					inStateStartTime = ""
+
+					log.WithFields(fields).Trace(m)
+
+					if inStateFailure {
+						i.log.WithFields(fields).Error("state failed")
+					} else {
+						i.log.WithFields(fields).Info("state completed")
+					}
+
+					inStateExecution = false
+					inStateFailure = false
+				} else {
+					i.log.WithField("component", "saltstack").Trace(m)
+				}
+			}
 		}
 
-		log := i.log.WithField("component", "saltstack")
+		i.log.Debug("signaling stdout read is complete")
+		done <- struct{}{}
+	}()
 
-		if !inStateExecution {
-			if beginRegexp.MatchString(m) {
-				matches := beginRegexp.FindAllStringSubmatch(m, -1)
-
-				fields := logrus.Fields{
-					"state":      matches[0][1],
-					"time_start": matches[0][2],
-				}
-				inStateStartTime = matches[0][2]
-
-				log.WithFields(fields).Trace(m)
-
-				i.log.WithFields(fields).Info("running state")
-				inStateExecution = true
-			} else {
-				i.log.WithField("component", "saltstack").Trace(m)
-			}
-		} else {
-			if m == "" {
-				continue
-			}
-
-			if execRegexp.MatchString(m) {
-				matches := execRegexp.FindAllStringSubmatch(m, -1)
-				log.Trace(m)
-				i.log.Infof("Executing %s for %s", matches[0][1], matches[0][2])
-			} else if !resRegexp.MatchString(m) {
-				log.Trace(m)
-				if strings.HasSuffix(m, "Failure!") {
-					inStateFailure = true
-					i.log.Warnf("Result: %s", m)
-				} else {
-					i.log.Debugf("Result: %s", m)
-				}
-			} else if endRegexp.MatchString(m) {
-				matches := endRegexp.FindAllStringSubmatch(m, -1)
-
-				duration := matches[0][3]
-				if len(matches[0]) > 3 {
-					duration = matches[0][4]
-				}
-
-				fields := logrus.Fields{
-					"state":      matches[0][1],
-					"time_start": inStateStartTime,
-					"time_end":   matches[0][2],
-					"duration":   duration,
-				}
-
-				inStateStartTime = ""
-
-				log.WithFields(fields).Trace(m)
-
-				if inStateFailure {
-					i.log.WithFields(fields).Error("state failed")
-				} else {
-					i.log.WithFields(fields).Info("state completed")
-				}
-
-				inStateExecution = false
-				inStateFailure = false
-			} else {
-				i.log.WithField("component", "saltstack").Trace(m)
-			}
-		}
-	}
-
-	y, err := io.ReadAll(stdout)
-	if err != nil {
+	i.log.Debug("executing cmd.start")
+	if err := cmd.Start(); err != nil {
 		return err
 	}
 
+	i.log.Debug("waiting for stderr read to complete")
+
+	<-done
+
+	i.log.Debug("reading from stderr is done")
+
+	// Note: we do not look for error here because
+	// we do it via the exit code down lower
 	cmd.Wait()
+
+	// TODO: write out to a file
 
 	i.log.WithField("log", i.logFile).Info("log file location")
 
-	switch cmd.ProcessState.ExitCode() {
+	switch code := cmd.ProcessState.ExitCode(); {
 	// This is hit when salt-call encounters an error
-	case 1:
+	case code > 0:
 		var results saltstack.LocalResultsErrors
-		if err := yaml.Unmarshal(y, &results); err != nil {
+		if err := yaml.Unmarshal(out.Bytes(), &results); err != nil {
 			return err
 		}
 
-		i.log.Warn(string(y))
+		i.log.Warn(out.String())
 
 		i.log.Error("salt-call finished with errors")
 	// This is hit when we kill salt-call because of a signals
 	// handler trap on the main cli process
-	case -1:
+	case code == -1:
 		i.log.Warn("salt-call terminated")
 	default:
 		var results saltstack.LocalResults
-		if err := yaml.Unmarshal(y, &results); err != nil {
+		if err := yaml.Unmarshal(out.Bytes(), &results); err != nil {
 			return err
 		}
 
+		success, failed := 0, 0
+
+		for _, r := range results.Local {
+			switch r.Result {
+			case true:
+				success++
+			case false:
+				failed++
+			}
+		}
+
 		i.log.WithFields(logrus.Fields{
-			"total": len(results.Local),
+			"total":   len(results.Local),
+			"success": success,
+			"failed":  failed,
 		}).Info("statistics")
 
 		i.log.WithField("exitcode", cmd.ProcessState.ExitCode()).Info("salt-call completed successfully")

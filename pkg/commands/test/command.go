@@ -7,6 +7,9 @@ import (
 )
 
 func Execute(c *cli.Context) error {
+	// 1. Check for docker/containerd
+	// 2. Start docker container with salt
+	// 3. Run and test the specific state
 
 	return nil
 }

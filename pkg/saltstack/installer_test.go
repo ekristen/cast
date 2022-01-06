@@ -1,6 +1,7 @@
 package saltstack
 
 import (
+	"context"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -19,8 +20,9 @@ func Test_Installer_installBinary(t *testing.T) {
 	cfg.Path = filepath.Join(dir, "saltstack")
 
 	inst := New(cfg)
+	inst.SetMode(Binary)
 
-	err1 := inst.Run()
+	err1 := inst.Run(context.TODO())
 	assert.NoError(t, err1)
 
 	tarfile := filepath.Join(cfg.Path, "saltstack-binary.tar.gz")

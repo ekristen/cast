@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/ekristen/cast/pkg/common"
+	"github.com/ekristen/cast/pkg/sysinfo"
 	"github.com/ekristen/cast/pkg/utils"
 
 	"github.com/google/go-github/v41/github"
@@ -67,16 +68,6 @@ type Distro struct {
 	selected *github.RepositoryRelease
 
 	archiveName string
-}
-
-type transport struct {
-	token               string
-	underlyingTransport http.RoundTripper
-}
-
-func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Add("Authorization", fmt.Sprintf("token %s", t.token))
-	return t.underlyingTransport.RoundTrip(req)
 }
 
 func New(ctx context.Context, distro string, version *string, includePreReleases bool, githubToken string) (*Distro, error) {
@@ -184,7 +175,7 @@ func (d *Distro) DownloadAssets(dir string) error {
 	if d.Manifest.Version == 1 {
 		d.archiveName = fmt.Sprintf("%s-%s.tar.gz", d.Repo, d.GetReleaseName())
 
-		if d.Name == "remux" {
+		if d.Owner == "remnux" && d.Repo == "salt-states" {
 			d.archiveName = fmt.Sprintf("%s-%s-%s.tar.gz", d.Owner, d.Repo, d.GetReleaseName())
 		}
 	}
@@ -441,6 +432,48 @@ func (d *Distro) verifyRelease() error {
 	if d.Manifest == nil && d.IsAlias {
 		d.Manifest = manifests[d.Alias]
 	}
+
+	isSupported := len(d.Manifest.SupportedOS) == 0
+
+	if !isSupported {
+		d.log.Info("checking operating system support")
+	}
+
+	osinfo := sysinfo.GetOSInfo()
+	for _, s := range d.Manifest.SupportedOS {
+		mustmatch := 0
+		match := 0
+
+		if s.ID != "" {
+			mustmatch++
+		}
+		if s.Codename != "" {
+			mustmatch++
+		}
+		if s.Release != "" {
+			mustmatch++
+		}
+
+		if s.ID != "" && strings.EqualFold(s.ID, osinfo.Vendor) {
+			match++
+		}
+		if s.Codename != "" && strings.EqualFold(s.Codename, osinfo.Codename) {
+			match++
+		}
+		if s.Release != "" && strings.EqualFold(s.Release, osinfo.Release) {
+			match++
+		}
+
+		if match == mustmatch {
+			isSupported = true
+		}
+	}
+
+	if !isSupported {
+		return fmt.Errorf("operating system is not supported")
+	}
+
+	d.log.Info("operating system is supported")
 
 	return nil
 }

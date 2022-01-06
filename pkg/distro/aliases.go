@@ -41,6 +41,13 @@ var manifests map[string]*Manifest = map[string]*Manifest{
 				Default:     false,
 			},
 		},
+		SupportedOS: []SupportedOS{
+			{
+				ID:       "ubuntu",
+				Release:  "20.04",
+				Codename: "focal",
+			},
+		},
 	},
 	"remnux": {
 		Version: 1,

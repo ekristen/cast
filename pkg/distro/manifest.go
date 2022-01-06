@@ -3,10 +3,11 @@ package distro
 import "gopkg.in/yaml.v3"
 
 type Manifest struct {
-	Version   int       `json:"version" yaml:"version" default:"2"`
-	Base      string    `json:"base" yaml:"base"`
-	Modes     []Mode    `json:"modes" yaml:"modes"`
-	Saltstack Saltstack `json:"saltstack,omitempty" yaml:"saltstack,omitempty"`
+	Version     int           `json:"version" yaml:"version" default:"2"`
+	Base        string        `json:"base" yaml:"base"`
+	Modes       []Mode        `json:"modes" yaml:"modes"`
+	Saltstack   Saltstack     `json:"saltstack,omitempty" yaml:"saltstack,omitempty"`
+	SupportedOS []SupportedOS `json:"supported_os,omitempty" yaml:"supported_os,omitempty"`
 }
 
 type Mode struct {
@@ -15,6 +16,12 @@ type Mode struct {
 	Deprecated  bool   `json:"deprecated" yaml:"deprecated"`
 	Replacement string `json:"replacement" yaml:"replacement"`
 	Default     bool   `json:"default" yaml:"default"`
+}
+
+type SupportedOS struct {
+	ID       string `yaml:"id"`
+	Release  string `yaml:"release,omitempty"`
+	Codename string `yaml:"codename,omitempty"`
 }
 
 type Saltstack struct {

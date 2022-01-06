@@ -1,18 +1,24 @@
 package saltstack
 
 import (
+	"bufio"
 	"bytes"
+	"context"
 	"crypto/sha512"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
-	"github.com/ekristen/cast/pkg/utils"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ekristen/cast/pkg/sysinfo"
+	"github.com/ekristen/cast/pkg/utils"
+
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 )
@@ -37,10 +43,10 @@ type Installer struct {
 
 func New(config *Config) *Installer {
 	return &Installer{
-		Mode:   Binary,
+		Mode:   Package,
 		Config: config,
 
-		log: logrus.WithField("component", "saltstack"),
+		log: logrus.WithField("component", "saltstack-installer"),
 	}
 }
 
@@ -48,22 +54,33 @@ func NewConfig() *Config {
 	return &Config{}
 }
 
+func (i *Installer) SetMode(mode Mode) {
+	i.Mode = mode
+}
+
 func (i *Installer) GetBinary() string {
-	return filepath.Join(i.Config.Path, "salt")
+	switch i.Mode {
+	case Binary:
+		return filepath.Join(i.Config.Path, "salt")
+	case Package:
+		return "/usr/bin/salt-call"
+	}
+
+	return ""
 }
 
 func (i *Installer) GetMode() Mode {
 	return i.Mode
 }
 
-func (i *Installer) Run() error {
+func (i *Installer) Run(ctx context.Context) error {
 	os.MkdirAll(i.Config.Path, 0755)
 
 	switch i.Mode {
 	case Binary:
 		return i.installBinary()
 	case Package:
-		return i.installPackage()
+		return i.installPackage(ctx)
 	default:
 		return fmt.Errorf("unsupported install mode")
 	}
@@ -111,7 +128,115 @@ func (i *Installer) installBinary() error {
 	return nil
 }
 
-func (i *Installer) installPackage() error {
+func (i *Installer) installPackage(ctx context.Context) error {
+	osinfo := sysinfo.GetOSInfo()
+
+	switch osinfo.Vendor {
+	case "ubuntu":
+		i.log.Debug("checking salt install on ubuntu")
+
+		runAptGetUpdate := false
+		runAptGetInstall := false
+
+		exists, err := utils.FileExists("/etc/apt/sources.list.d/saltstack.list")
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			i.log.Debug("old saltstack.list exists, renaming to salt.list")
+			if err := os.Rename("/etc/apt/sources.list.d/saltstack.list", "/etc/apt/sources.list.d/salt.list"); err != nil {
+				return err
+			}
+			runAptGetUpdate = true
+		}
+
+		exists, err = utils.FileExists("/etc/apt/sources.list.d/salt.list")
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			aptlist := fmt.Sprintf(UbuntuRepo, osinfo.Architecture, osinfo.Version, osinfo.Architecture, osinfo.Codename)
+			if err := ioutil.WriteFile("/etc/apt/sources.list.d/salt.list", []byte(aptlist), 0644); err != nil {
+				return err
+			}
+			runAptGetInstall = true
+		} else {
+			i.log.Debug("salt configured with apt")
+		}
+
+		if runAptGetUpdate || runAptGetInstall {
+			if err := i.runCommand(ctx, "apt-get", "update"); err != nil {
+				return err
+			}
+		}
+
+		if runAptGetInstall {
+			args := []string{"install", "-o", `Dpkg::Options::="--force-confdef"`, "-o", `Dpkg::Options::="--force-confold"`, "-y", "--allow-change-held-packages", "salt-common"}
+			if err := i.runCommand(ctx, "apt-get", args...); err != nil {
+				return err
+			}
+		}
+
+		exists, err = utils.FileExists("/usr/bin/salt-call")
+		if err != nil {
+			return err
+		}
+		if !exists {
+			return fmt.Errorf("salt-call not found at /usr/bin/salt-call")
+		}
+
+		i.log.Info("salt installed properly")
+	default:
+		return fmt.Errorf("unsupported operating system: %s", osinfo.Vendor)
+	}
+
+	return nil
+}
+
+func (i *Installer) runCommand(ctx context.Context, command string, args ...string) error {
+	log := i.log.WithField("command", command)
+
+	log.Debug("running command")
+
+	cmd := exec.Command(command, args...)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	cmd.Start()
+
+	go func() {
+		<-ctx.Done()
+
+		log := i.log.WithField("pid", cmd.Process.Pid)
+
+		log.Warnf("parent context signaled done, killing %s process", command)
+
+		if err := cmd.Process.Kill(); err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		log.Warnf("%s killed", command)
+	}()
+
+	scanner := bufio.NewScanner(stdout)
+	for scanner.Scan() {
+		m := strings.TrimPrefix(scanner.Text(), "# ")
+		log.Trace(m)
+	}
+
+	cmd.Wait()
+
+	if cmd.ProcessState.ExitCode() > 0 {
+		log.Errorf("process exited %d", cmd.ProcessState.ExitCode())
+		return fmt.Errorf("process exited %d", cmd.ProcessState.ExitCode())
+	}
+
 	return nil
 }
 
