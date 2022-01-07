@@ -182,7 +182,7 @@ func init() {
 
 	cmd := &cli.Command{
 		Name:   "install",
-		Usage:  "install a cast compatible distro on a linux system",
+		Usage:  "install a cast compatible distro",
 		Flags:  append(flags, commands.GlobalFlags()...),
 		Before: commands.GlobalBefore,
 		Action: Execute,

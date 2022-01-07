@@ -404,7 +404,7 @@ func (d *Distro) fetchReleases(ctx context.Context) error {
 
 func (d *Distro) verifyRelease() error {
 	for _, asset := range d.selected.Assets {
-		if *asset.Name == "manifest.yaml" || *asset.Name == "manifest.json" {
+		if *asset.Name == "manifest.yml" {
 			assetURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/assets/%d", d.Owner, d.Repo, asset.GetID())
 			// asset.GetBrowserDownloadURL()
 

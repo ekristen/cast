@@ -18,10 +18,8 @@ func DownloadFile(url string, dest string, httpClient *http.Client, headers map[
 		return err
 	}
 
-	if headers != nil {
-		for k, v := range headers {
-			req.Header.Add(k, v)
-		}
+	for k, v := range headers {
+		req.Header.Add(k, v)
 	}
 
 	resp, err := httpClient.Do(req)

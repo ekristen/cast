@@ -234,7 +234,7 @@ func (i *Installer) runSaltstack() error {
 
 					fields := logrus.Fields{
 						"state":      matches[0][1],
-						"time_start": matches[0][2],
+						"time_begin": matches[0][2],
 					}
 					inStateStartTime = matches[0][2]
 
@@ -272,7 +272,7 @@ func (i *Installer) runSaltstack() error {
 
 					fields := logrus.Fields{
 						"state":      matches[0][1],
-						"time_start": inStateStartTime,
+						"time_begin": inStateStartTime,
 						"time_end":   matches[0][2],
 						"duration":   duration,
 					}
@@ -356,7 +356,7 @@ func (i *Installer) runSaltstack() error {
 			"failed":  failed,
 		}).Info("statistics")
 
-		i.log.WithField("exitcode", cmd.ProcessState.ExitCode()).Info("salt-call completed successfully")
+		i.log.Info("salt-call completed successfully")
 	}
 
 	return nil

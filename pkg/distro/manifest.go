@@ -13,9 +13,9 @@ type Manifest struct {
 type Mode struct {
 	Name        string `json:"name" yaml:"name"`
 	State       string `json:"state" yaml:"state"`
-	Deprecated  bool   `json:"deprecated" yaml:"deprecated"`
-	Replacement string `json:"replacement" yaml:"replacement"`
-	Default     bool   `json:"default" yaml:"default"`
+	Deprecated  bool   `json:"deprecated" yaml:"deprecated,omitempty"`
+	Replacement string `json:"replacement" yaml:"replacement,omitempty"`
+	Default     bool   `json:"default" yaml:"default,omitempty"`
 }
 
 type SupportedOS struct {
