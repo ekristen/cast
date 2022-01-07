@@ -16,6 +16,7 @@ import (
 
 	"github.com/ekristen/cast/pkg/config"
 	"github.com/ekristen/cast/pkg/git"
+	"github.com/ekristen/cast/pkg/utils"
 	"github.com/google/go-github/v41/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -41,6 +42,9 @@ type Artifact struct {
 }
 
 func Run(ctx context.Context, configFile string, githubToken string, tag string) (err error) {
+	var dl *http.Client
+	var gh *github.Client
+
 	log := logrus.WithField("component", "release").WithField("handler", "run")
 
 	cfg, err := config.Load(configFile)
@@ -59,8 +63,17 @@ func Run(ctx context.Context, configFile string, githubToken string, tag string)
 		}
 	}
 
-	var dl *http.Client
-	var gh *github.Client
+	if exists, err := utils.FileExists("cosign.key"); err != nil {
+		return err
+	} else if !exists {
+		return fmt.Errorf("cosign.key not found")
+	}
+
+	if exists, err := utils.FileExists("cosign.pub"); err != nil {
+		return err
+	} else if !exists {
+		return fmt.Errorf("cosign.pub not found")
+	}
 
 	if githubToken != "" {
 		ts := oauth2.StaticTokenSource(
@@ -163,6 +176,11 @@ func Run(ctx context.Context, configFile string, githubToken string, tag string)
 	}
 
 	for _, f := range cfg.Release.ExtraFiles {
+		artifacts = append(artifacts, Artifact{
+			Name: filepath.Base(f),
+			Path: filepath.Join(dir, filepath.Base(f)),
+		})
+
 		copyFile(f, filepath.Join(dir, filepath.Base(f)))
 	}
 
@@ -175,6 +193,11 @@ func Run(ctx context.Context, configFile string, githubToken string, tag string)
 	artifacts = append(artifacts, Artifact{
 		Name: "checksums.txt.sig",
 		Path: fmt.Sprintf("%s.sig", checksumsFile.Name()),
+	})
+
+	artifacts = append(artifacts, Artifact{
+		Name: "cosign.pub",
+		Path: "cosign.pub",
 	})
 
 	for _, a := range artifacts {

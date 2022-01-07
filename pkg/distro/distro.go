@@ -15,6 +15,7 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -225,6 +226,10 @@ func (d *Distro) ValidateAssets(dir string) error {
 		}
 	case 2:
 		// new
+		if err := d.validateSignature(dir); err != nil {
+			return err
+		}
+
 		if err := d.validateChecksums(dir); err != nil {
 			return err
 		}
@@ -481,6 +486,26 @@ func (d *Distro) verifyRelease() error {
 
 	d.log.Info("operating system is supported")
 
+	return nil
+}
+
+func (d *Distro) validateSignature(dir string) error {
+	args := []string{
+		"verify-blob",
+		fmt.Sprintf("--key=%s", filepath.Join(dir, "cosign.pub")),
+		fmt.Sprintf("--signature=%s", filepath.Join(dir, "checksums.txt.sig")),
+		filepath.Join(dir, "checksums.txt"),
+	}
+
+	var b bytes.Buffer
+
+	cmd := exec.CommandContext(d.ctx, "cosign", args...)
+	cmd.Stderr = &b
+	cmd.Stdout = &b
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("verify-blob: %s failed: %w: %s", "cosign", err, b.String())
+	}
 	return nil
 }
 
