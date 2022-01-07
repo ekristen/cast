@@ -2,14 +2,17 @@ package distro
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
 	"compress/gzip"
 	"context"
 	"crypto/sha256"
+	"crypto/sha512"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -222,6 +225,9 @@ func (d *Distro) ValidateAssets(dir string) error {
 		}
 	case 2:
 		// new
+		if err := d.validateChecksums(dir); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -229,7 +235,7 @@ func (d *Distro) ValidateAssets(dir string) error {
 
 func (d *Distro) downloadArchiveFile(url, filename, dir string) error {
 	log := d.log.WithField("version", d.GetReleaseName())
-	dst := filepath.Join(dir, filename)
+	//dst := filepath.Join(dir, filename)
 
 	/*
 		if !i.config.NoCache {
@@ -247,7 +253,7 @@ func (d *Distro) downloadArchiveFile(url, filename, dir string) error {
 	log.WithField("url", url).Debug("tarball url")
 	log.Info("downloading archive file")
 
-	if err := utils.DownloadFile(url, dst, d.dlHttp, nil); err != nil {
+	if err := d.downloadFile(url, dir, d.dlHttp, nil); err != nil {
 		return err
 	}
 
@@ -478,6 +484,60 @@ func (d *Distro) verifyRelease() error {
 	return nil
 }
 
+func (d *Distro) validateChecksums(dir string) error {
+	log := d.log.WithField("handler", "validateChecksums")
+	log.Info("validating checksums")
+
+	filename := filepath.Join(dir, "checksums.txt")
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	hashByName := map[string]string{}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		parts := strings.Split(scanner.Text(), " ")
+		hashByName[parts[1]] = parts[0]
+	}
+
+	checksumCount := len(hashByName)
+
+	log.WithField("count", checksumCount).Debug("found checkums to validate")
+
+	if checksumCount < 2 {
+		return fmt.Errorf("validation failed: expected at least 2 files to validate, found: %d", checksumCount)
+	}
+
+	for filename, expected := range hashByName {
+		log := d.log.WithField("filename", filename)
+
+		hasher := sha512.New()
+
+		f, err := os.Open(filepath.Join(dir, filename))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		if _, err := io.Copy(hasher, f); err != nil {
+			return err
+		}
+
+		actual := fmt.Sprintf("%x", hasher.Sum(nil))
+
+		if actual != expected {
+			return fmt.Errorf("hashes do not match for: %s - actual: %s, expected: %s", filename, actual, expected)
+		}
+
+		log.Info("checksum validated")
+	}
+
+	return nil
+}
+
 func (d *Distro) validateFile(dir string, filename string) error {
 	d.log.WithField("filename", filename).Info("validating file checksum")
 
@@ -610,4 +670,43 @@ func (d *Distro) validatePGPSignature(dir, filename string) error {
 	}
 
 	return nil
+}
+
+func (d *Distro) downloadFile(url string, dir string, httpClient *http.Client, headers map[string]string) error {
+	if httpClient == nil {
+		httpClient = &http.Client{}
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode > 399 {
+		return fmt.Errorf("received error code %d attempting to download", resp.StatusCode)
+	}
+
+	_, params, err := mime.ParseMediaType(resp.Header.Get("content-disposition"))
+	if err != nil {
+		return err
+	}
+
+	out, err := os.Create(filepath.Join(dir, params["filename"]))
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	return err
 }
