@@ -253,9 +253,101 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         Home
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-a-cast-distro" class="md-nav__link">
+    What is a Cast Distro?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-developers" class="md-nav__link">
+    For Developers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aliases" class="md-nav__link">
+    Aliases
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developers" class="md-nav__link">
+    Developers
+  </a>
+  
+    <nav class="md-nav" aria-label="Developers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#saltstack" class="md-nav__link">
+    Saltstack
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#release" class="md-nav__link">
+    Release
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -296,6 +388,82 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-a-cast-distro" class="md-nav__link">
+    What is a Cast Distro?
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-developers" class="md-nav__link">
+    For Developers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aliases" class="md-nav__link">
+    Aliases
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#developers" class="md-nav__link">
+    Developers
+  </a>
+  
+    <nav class="md-nav" aria-label="Developers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#saltstack" class="md-nav__link">
+    Saltstack
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#release" class="md-nav__link">
+    Release
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -308,7 +476,46 @@
                 
 
 <h1 id="cast">Cast<a class="headerlink" href="#cast" title="Permanent link">&para;</a></h1>
-<p>Install Cast compatible linux distros quickly and simply.</p>
+<p>Cast is an installer tool for any Cast distro like <a href="https://github.com/teamdfir/sift">SIFT</a> or <a href="https://github.com/remnux/remnux">REMNUX</a>.</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>cast install &lt;owner/repo<span class="p">|</span>alias&gt;
+</code></pre></div>
+<p><strong>Note:</strong> there are only two aliases currently supported, <code>sift</code> and <code>remnux</code> which are resolved to <code>teamdfir/sift-saltstack</code> and <code>remnux/salt-states</code> respectively.</p>
+<h2 id="what-is-a-cast-distro">What is a Cast Distro?<a class="headerlink" href="#what-is-a-cast-distro" title="Permanent link">&para;</a></h2>
+<p>Simply put a cast distro is one published by the cast binary, however it's a bit more complicated than that.</p>
+<p>The underlying technology used for installing the distro is Saltstack.</p>
+<p>There are only two (2) version 1 cast distros out there and they are SIFT and REMnux and what makes them a v1 is the way the release files are generated and signed and how the saltstack files are organized in the repository.</p>
+<p>A version 2 cast distro is one like <a href="">example-distro-saltstack</a> where the salt states start in the root of the project and the release is generated by the <code>cast-devtools</code>. The reason for moving the states to the root is for <code>git submodule</code> usage for distros that extend another distro.</p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>Cast is configured via the <code>.cast.yml</code> file in the root of the cast distro project. This configuration is required and contains important information like what GitHub Repository should releases be published to, what the manifest file contents should be.</p>
+<p>Part of the configuration is the <code>manifest</code> definition that ultimately gets uploaded as a release asset. The manifest dictates things like <code>base</code>, <code>modes</code>, and <code>supported operating systems</code>.</p>
+<ul>
+<li><code>base</code> - this is the name of the base directory that the files should be extracted into</li>
+<li><code>modes</code> - this is a way to define modes that the user can specify along with the default mode, if none is specified</li>
+<li><code>supported_os</code> - this is a way to define what operating systems are supported</li>
+</ul>
+<h3 id="for-developers">For Developers<a class="headerlink" href="#for-developers" title="Permanent link">&para;</a></h3>
+<p>If your distro is called <code>alpha</code> then your <code>base</code> should be <code>alpha</code>, all salt states will be homed into a directory called <code>alpha</code></p>
+<h3 id="aliases">Aliases<a class="headerlink" href="#aliases" title="Permanent link">&para;</a></h3>
+<p>Cast has the concept of aliases and it's possible to add additional distros to this alias list.</p>
+<p>However the aliases serve a more specific purpose for supporing backwards compatibility for older versions of SIFT and REMnux that were not released as a <strong>cast</strong> distro originally.</p>
+<h2 id="developers">Developers<a class="headerlink" href="#developers" title="Permanent link">&para;</a></h2>
+<p>Developing a distro for cast is very simple, this documentation will walk you through cast initialization.</p>
+<h3 id="saltstack">Saltstack<a class="headerlink" href="#saltstack" title="Permanent link">&para;</a></h3>
+<p>To make embedding a distro easier in another distro both for the community and for SANS builds purposes, the salt states have now been moved to the root of the project. This allows for a repo to be submoduled into another repo and the <code>manifest.yml</code> dictates to the installer how things should be extracted and installed.</p>
+<p>Futhermore the <code>devtools</code> contains commands to help developers test their states in the correct structure format.</p>
+<h3 id="release">Release<a class="headerlink" href="#release" title="Permanent link">&para;</a></h3>
+<p>Requirements</p>
+<ul>
+<li>Tag must be created outside of the tool and pushed to the remote</li>
+<li>Cosign private key and public key must be present in the repo</li>
+</ul>
+<p>Creating a release has never been more simply. However one thing is required, that you tag and push the tag to GitHub prior to running the command.</p>
+<div class="highlight"><pre><span></span><code>git tag v1.0.0 <span class="o">&amp;&amp;</span> git push origin --tags
+</code></pre></div>
+<p>Then you simply run the release command from your local branch.</p>
+<div class="highlight"><pre><span></span><code>cast-devtools release
+</code></pre></div>
 
               
             </article>
