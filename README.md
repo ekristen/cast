@@ -1,5 +1,7 @@
 # Cast
 
+**STATUS: Early Beta**
+
 Cast is an installer tool for any Cast distro like [SIFT](https://github.com/teamdfir/sift) or [REMNUX](https://github.com/remnux/remnux).
 
 ## Usage
