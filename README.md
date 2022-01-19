@@ -5,8 +5,10 @@ Cast is an installer tool for any Cast distro like [SIFT](https://github.com/tea
 ## Usage
 
 ```bash
-cast install owner/repo
+cast install <owner/repo|alias>
 ```
+
+**Note:** there are only two aliases currently supported, `sift` and `remnux` which are resolved to `teamdfir/sift-saltstack` and `remnux/salt-states` respectively.
 
 ## What is a Cast Distro?
 
