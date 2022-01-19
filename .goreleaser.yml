@@ -1,8 +1,8 @@
-dist: releases
 release:
   github:
     owner: ekristen
     name: cast
+dist: release
 env:
   - CGO_ENABLED=0
 builds:
