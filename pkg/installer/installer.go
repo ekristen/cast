@@ -198,6 +198,10 @@ func (i *Installer) runSaltstack() error {
 	go func() {
 		<-i.ctx.Done()
 
+		if cmd == nil || cmd.Process == nil {
+			return
+		}
+
 		log := i.log.WithField("pid", cmd.Process.Pid)
 
 		log.Warn("parent context signaled done, killing salt-call process")
@@ -220,7 +224,7 @@ func (i *Installer) runSaltstack() error {
 			m := strings.TrimPrefix(scanner.Text(), "# ")
 
 			/*
-				_, err := logFile.Write([]byte(m + "\n"))
+				_, err := logFile.WriteString(fmt.Sprintf("%s\n", m))
 				if err != nil {
 					i.log.WithError(err).Warn("unable to write to log file")
 				}
@@ -295,7 +299,7 @@ func (i *Installer) runSaltstack() error {
 			}
 		}
 
-		i.log.Debug("signaling stdout read is complete")
+		i.log.Debug("signaling stderr read is complete")
 		done <- struct{}{}
 	}()
 
@@ -320,44 +324,75 @@ func (i *Installer) runSaltstack() error {
 
 	switch code := cmd.ProcessState.ExitCode(); {
 	// This is hit when salt-call encounters an error
-	case code > 0:
+	case code == 1:
+		i.log.WithField("code", code).Error("salt-call finished with errors")
+
 		var results saltstack.LocalResultsErrors
 		if err := yaml.Unmarshal(out.Bytes(), &results); err != nil {
+			fmt.Println(out.String())
 			return err
 		}
 
 		i.log.Warn(out.String())
 
-		i.log.Error("salt-call finished with errors")
 	// This is hit when we kill salt-call because of a signals
 	// handler trap on the main cli process
 	case code == -1:
 		i.log.Warn("salt-call terminated")
-	default:
-		var results saltstack.LocalResults
-		if err := yaml.Unmarshal(out.Bytes(), &results); err != nil {
+	case code == 2:
+		if err := i.parseAndLogResults(out.Bytes()); err != nil {
 			return err
 		}
 
-		success, failed := 0, 0
-
-		for _, r := range results.Local {
-			switch r.Result {
-			case true:
-				success++
-			case false:
-				failed++
-			}
+		i.log.Info("salt-call completed but had failed states")
+	case code == 0:
+		if err := i.parseAndLogResults(out.Bytes()); err != nil {
+			return err
 		}
-
-		i.log.WithFields(logrus.Fields{
-			"total":   len(results.Local),
-			"success": success,
-			"failed":  failed,
-		}).Info("statistics")
 
 		i.log.Info("salt-call completed successfully")
 	}
+
+	return nil
+}
+
+func (i *Installer) parseAndLogResults(in []byte) error {
+	var results saltstack.LocalResults
+	if err := yaml.Unmarshal(in, &results); err != nil {
+		fmt.Println(in)
+		return err
+	}
+
+	success, failed := 0, 0
+
+	var firstFailedState saltstack.Result
+
+	for _, r := range results.Local {
+		switch r.Result {
+		case true:
+			success++
+		case false:
+			if failed == 0 {
+				firstFailedState = r
+			}
+			failed++
+		}
+	}
+
+	if failed > 0 {
+		space := regexp.MustCompile(`\s+`)
+		i.log.WithFields(logrus.Fields{
+			"sls":     firstFailedState.SLS,
+			"run_num": firstFailedState.RunNumber,
+			"comment": strings.ReplaceAll(fmt.Sprintf("%q", space.ReplaceAllString(firstFailedState.Comment, " ")), `"`, ""),
+		}).Warn("first failed state")
+	}
+
+	i.log.WithFields(logrus.Fields{
+		"total":   len(results.Local),
+		"success": success,
+		"failed":  failed,
+	}).Info("statistics")
 
 	return nil
 }

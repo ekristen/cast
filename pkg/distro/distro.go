@@ -78,8 +78,6 @@ func New(ctx context.Context, distro string, version *string, includePreReleases
 	var d *Distro
 	if v, ok := aliases[distro]; ok {
 		d = v
-		d.Alias = distro
-		d.IsAlias = true
 	} else {
 		parts := strings.Split(distro, "/")
 		if len(parts) != 2 {
@@ -103,6 +101,7 @@ func New(ctx context.Context, distro string, version *string, includePreReleases
 	d.ctx = ctx
 
 	if githubToken != "" {
+		logrus.Debug("using authenticated github client")
 		ts := oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: githubToken},
 		)
@@ -113,6 +112,7 @@ func New(ctx context.Context, distro string, version *string, includePreReleases
 			Transport: &transport{token: githubToken, underlyingTransport: http.DefaultTransport},
 		}
 	} else {
+		logrus.Warn("using unauthenticated github client, could result in API rate limiting")
 		d.github = github.NewClient(nil)
 	}
 
@@ -175,7 +175,6 @@ func (d *Distro) Download(dir string) error {
 }
 
 func (d *Distro) DownloadAssets(dir string) error {
-	d.archiveName = fmt.Sprintf("%s.tar.gz", d.GetReleaseName())
 	if d.Manifest.Version == 1 {
 		d.archiveName = fmt.Sprintf("%s-%s.tar.gz", d.Repo, d.GetReleaseName())
 
@@ -189,7 +188,7 @@ func (d *Distro) DownloadAssets(dir string) error {
 		archiveURL = fmt.Sprintf("https://github.com/%s/%s/archive/%s.tar.gz", d.Owner, d.Repo, d.selected.GetTagName())
 	}
 
-	if err := d.downloadArchiveFile(archiveURL, d.archiveName, dir); err != nil {
+	if err := d.downloadArchiveFile(archiveURL, dir); err != nil {
 		return err
 	}
 
@@ -211,7 +210,7 @@ func (d *Distro) ValidateAssets(dir string) error {
 		// original
 		for _, a := range d.selected.Assets {
 			if strings.HasSuffix(a.GetName(), ".sha256") {
-				if err := d.validateFile(dir, strings.TrimSuffix(a.GetName(), ".sha256")); err != nil {
+				if err := d.validateFile(dir, d.archiveName, a.GetName()); err != nil {
 					return err
 				}
 			}
@@ -219,7 +218,7 @@ func (d *Distro) ValidateAssets(dir string) error {
 
 		for _, a := range d.selected.Assets {
 			if strings.HasSuffix(a.GetName(), ".asc") && !strings.HasSuffix(a.GetName(), ".sha256.asc") {
-				if err := d.validatePGPSignature(dir, strings.TrimSuffix(a.GetName(), ".asc")); err != nil {
+				if err := d.validatePGPSignature(dir, d.archiveName, a.GetName()); err != nil {
 					return err
 				}
 			}
@@ -238,7 +237,7 @@ func (d *Distro) ValidateAssets(dir string) error {
 	return nil
 }
 
-func (d *Distro) downloadArchiveFile(url, filename, dir string) error {
+func (d *Distro) downloadArchiveFile(url, dir string) error {
 	log := d.log.WithField("version", d.GetReleaseName())
 	//dst := filepath.Join(dir, filename)
 
@@ -444,6 +443,10 @@ func (d *Distro) verifyRelease() error {
 		d.Manifest = manifests[d.Alias]
 	}
 
+	if d.Manifest == nil {
+		return fmt.Errorf("unable to resolve a manifest for: %s", d.Name)
+	}
+
 	isSupported := len(d.Manifest.SupportedOS) == 0
 
 	if !isSupported {
@@ -563,7 +566,7 @@ func (d *Distro) validateChecksums(dir string) error {
 	return nil
 }
 
-func (d *Distro) validateFile(dir string, filename string) error {
+func (d *Distro) validateFile(dir, filename, checksumFilename string) error {
 	d.log.WithField("filename", filename).Info("validating file checksum")
 
 	filename = filepath.Join(dir, filename)
@@ -587,7 +590,7 @@ func (d *Distro) validateFile(dir string, filename string) error {
 
 	actual := fmt.Sprintf("%x", hasher.Sum(nil))
 
-	expectedBytes, err := ioutil.ReadFile(fmt.Sprintf("%s.sha256", filename))
+	expectedBytes, err := ioutil.ReadFile(filepath.Join(dir, checksumFilename))
 	if err != nil {
 		return err
 	}
@@ -605,7 +608,7 @@ func (d *Distro) validateFile(dir string, filename string) error {
 	}
 }
 
-func (d *Distro) validatePGPSignature(dir, filename string) error {
+func (d *Distro) validatePGPSignature(dir, filename, checksumFilename string) error {
 	d.log.WithField("filename", filename).Info("validating file pgp signature")
 
 	filename = filepath.Join(dir, filename)
@@ -622,7 +625,7 @@ func (d *Distro) validatePGPSignature(dir, filename string) error {
 	}
 
 	// Get a Reader for the signature file
-	sigFile, err := os.Open(fmt.Sprintf("%s.asc", filename))
+	sigFile, err := os.Open(filepath.Join(dir, checksumFilename))
 	if err != nil {
 		return err
 	}
@@ -725,6 +728,8 @@ func (d *Distro) downloadFile(url string, dir string, httpClient *http.Client, h
 	if err != nil {
 		return err
 	}
+
+	d.archiveName = params["filename"]
 
 	out, err := os.Create(filepath.Join(dir, params["filename"]))
 	if err != nil {

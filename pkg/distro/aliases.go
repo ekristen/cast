@@ -2,12 +2,28 @@ package distro
 
 var aliases map[string]*Distro = map[string]*Distro{
 	"sift": {
-		Owner: "teamdfir",
-		Repo:  "sift-saltstack",
+		Owner:   "teamdfir",
+		Repo:    "sift-saltstack",
+		Alias:   "sift",
+		IsAlias: true,
+	},
+	"teamdfir/sift-saltstack": {
+		Owner:   "teamdfir",
+		Repo:    "sift-saltstack",
+		Alias:   "sift",
+		IsAlias: true,
 	},
 	"remnux": {
-		Owner: "remnux",
-		Repo:  "salt-states",
+		Owner:   "remnux",
+		Repo:    "salt-states",
+		Alias:   "remnux",
+		IsAlias: true,
+	},
+	"remnux/salt-states": {
+		Owner:   "remnux",
+		Repo:    "salt-states",
+		Alias:   "remnux",
+		IsAlias: true,
 	},
 }
 
