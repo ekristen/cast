@@ -1,0 +1,35 @@
+site_name: Cast
+site_url: https://ekristen.github.io/cast/
+repo_name: ekristen/cast
+repo_url: https://github.com/ekristen/cast/
+edit_uri: ""
+
+site_dir: public
+
+theme:
+  name: material
+  language: en
+  palette:
+    scheme: preference
+    primary: blue
+    accent: indigo
+  features:
+    - navigation.sections
+    - navigation.tabs
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.highlight
+
+nav:
+  - Home: index.md
+  - Distro: distro.md
