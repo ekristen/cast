@@ -175,7 +175,7 @@ func init() {
 		&cli.StringFlag{
 			Name:   "saltstack-log-level",
 			Usage:  "Log level for Saltstack",
-			Value:  "debug",
+			Value:  "info",
 			Hidden: true,
 		},
 	}
