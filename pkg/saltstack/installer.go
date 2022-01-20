@@ -78,7 +78,7 @@ func (i *Installer) Run(ctx context.Context) error {
 
 	switch i.Mode {
 	case Binary:
-		return i.installBinary()
+		return i.installBinary(ctx)
 	case Package:
 		return i.installPackage(ctx)
 	default:
@@ -86,7 +86,7 @@ func (i *Installer) Run(ctx context.Context) error {
 	}
 }
 
-func (i *Installer) installBinary() error {
+func (i *Installer) installBinary(ctx context.Context) error {
 	log := i.log.WithField("handler", "install-binary")
 
 	tarfile := filepath.Join(i.Config.Path, "saltstack-binary.tar.gz")
@@ -94,17 +94,17 @@ func (i *Installer) installBinary() error {
 	sigfile := filepath.Join(i.Config.Path, "saltstack-binary.tar.gz.sha512.asc")
 
 	log.Info("downloading tar.gz file")
-	if err := utils.DownloadFile(BinaryURL, tarfile, nil, nil); err != nil {
+	if err := utils.DownloadFile(ctx, BinaryURL, tarfile, nil, nil); err != nil {
 		return err
 	}
 
 	log.Info("downloading sha512 file")
-	if err := utils.DownloadFile(HashURL, hashfile, nil, nil); err != nil {
+	if err := utils.DownloadFile(ctx, HashURL, hashfile, nil, nil); err != nil {
 		return err
 	}
 
 	log.Info("downloading signature file")
-	if err := utils.DownloadFile(SigURL, sigfile, nil, nil); err != nil {
+	if err := utils.DownloadFile(ctx, SigURL, sigfile, nil, nil); err != nil {
 		return err
 	}
 

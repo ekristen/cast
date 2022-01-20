@@ -383,7 +383,7 @@ func (d *Distro) downloadReleaseAsset(url, filename, dir string) error {
 		"accept": "application/octet-stream",
 	}
 
-	if err := utils.DownloadFile(url, dst, d.dlHttp, headers); err != nil {
+	if err := utils.DownloadFile(d.ctx, url, dst, d.dlHttp, headers); err != nil {
 		return err
 	}
 
@@ -422,7 +422,7 @@ func (d *Distro) verifyRelease() error {
 				"accept": "application/octet-stream",
 			}
 
-			contents, err := utils.DownloadFileToBytes(assetURL, d.dlHttp, headers)
+			contents, err := utils.DownloadFileToBytes(d.ctx, assetURL, d.dlHttp, headers)
 			if err != nil {
 				return err
 			}
@@ -705,7 +705,7 @@ func (d *Distro) downloadFile(url string, dir string, httpClient *http.Client, h
 		httpClient = &http.Client{}
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(d.ctx, "GET", url, nil)
 	if err != nil {
 		return err
 	}

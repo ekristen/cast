@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -183,7 +184,7 @@ func (i *Installer) runSaltstack() error {
 
 	var out bytes.Buffer
 
-	cmd := exec.Command(i.command, args...)
+	cmd := exec.CommandContext(i.ctx, i.command, args...)
 	cmd.Stdout = &out
 
 	stderr, err := cmd.StderrPipe()
@@ -191,29 +192,32 @@ func (i *Installer) runSaltstack() error {
 		return err
 	}
 
-	scanner := bufio.NewScanner(stderr)
+	teeStderr := io.TeeReader(stderr, logFile)
+	scanner := bufio.NewScanner(teeStderr)
 
 	done := make(chan struct{})
 
-	go func() {
-		<-i.ctx.Done()
+	/*
+		go func() {
+			<-i.ctx.Done()
 
-		if cmd == nil || cmd.Process == nil {
-			return
-		}
+			if cmd == nil || cmd.Process == nil {
+				return
+			}
 
-		log := i.log.WithField("pid", cmd.Process.Pid)
+			log := i.log.WithField("pid", cmd.Process.Pid)
 
-		log.Warn("parent context signaled done, killing salt-call process")
+			log.Warn("parent context signaled done, killing salt-call process")
 
-		if err := cmd.Process.Kill(); err != nil {
-			log.Fatal(err)
-			return
-		}
+			if err := cmd.Process.Kill(); err != nil {
+				log.Fatal(err)
+				return
+			}
 
-		log.Warn("salt-call killed")
-		log.WithField("log", i.logFile).Info("log file location")
-	}()
+			log.Warn("salt-call killed")
+			log.WithField("log", i.logFile).Info("log file location")
+		}()
+	*/
 
 	go func() {
 		inStateExecution := false
@@ -244,7 +248,7 @@ func (i *Installer) runSaltstack() error {
 
 					log.WithFields(fields).Trace(m)
 
-					i.log.WithFields(fields).Info("running state")
+					i.log.WithFields(fields).Debug("running state")
 					inStateExecution = true
 				} else {
 					i.log.WithField("component", "saltstack").Trace(m)

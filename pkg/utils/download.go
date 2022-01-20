@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -8,12 +9,12 @@ import (
 	"os"
 )
 
-func DownloadFile(url string, dest string, httpClient *http.Client, headers map[string]string) error {
+func DownloadFile(ctx context.Context, url string, dest string, httpClient *http.Client, headers map[string]string) error {
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return err
 	}
@@ -42,20 +43,18 @@ func DownloadFile(url string, dest string, httpClient *http.Client, headers map[
 	return err
 }
 
-func DownloadFileToBytes(url string, httpClient *http.Client, headers map[string]string) ([]byte, error) {
+func DownloadFileToBytes(ctx context.Context, url string, httpClient *http.Client, headers map[string]string) ([]byte, error) {
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if headers != nil {
-		for k, v := range headers {
-			req.Header.Add(k, v)
-		}
+	for k, v := range headers {
+		req.Header.Add(k, v)
 	}
 
 	resp, err := httpClient.Do(req)
