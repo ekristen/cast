@@ -2,6 +2,8 @@
 
 Cast is an installer tool for any Cast distro like [SIFT](https://github.com/teamdfir/sift) or [REMNUX](https://github.com/remnux/remnux).
 
+[![asciicast](https://asciinema.org/a/463178.svg)](https://asciinema.org/a/463178)
+
 ## Usage
 
 ```bash
