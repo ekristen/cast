@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://ekristen.github.io/cast/distro/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.7">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.8">
     
     
       
@@ -19,7 +19,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.cd566b2a.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.6e60f8b8.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
@@ -299,6 +299,73 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#manifest" class="md-nav__link">
+    Manifest
+  </a>
+  
+    <nav class="md-nav" aria-label="Manifest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specification" class="md-nav__link">
+    Specification
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modes" class="md-nav__link">
+    Modes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-operating-systems-os" class="md-nav__link">
+    Supported Operating Systems (OS)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#saltstack" class="md-nav__link">
+    SaltStack
+  </a>
+  
+    <nav class="md-nav" aria-label="SaltStack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pillars" class="md-nav__link">
+    Pillars
+  </a>
+  
+    <nav class="md-nav" aria-label="Pillars">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#template-data" class="md-nav__link">
+    Template Data
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -340,6 +407,73 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#manifest" class="md-nav__link">
+    Manifest
+  </a>
+  
+    <nav class="md-nav" aria-label="Manifest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#specification" class="md-nav__link">
+    Specification
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modes" class="md-nav__link">
+    Modes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-operating-systems-os" class="md-nav__link">
+    Supported Operating Systems (OS)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#saltstack" class="md-nav__link">
+    SaltStack
+  </a>
+  
+    <nav class="md-nav" aria-label="SaltStack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pillars" class="md-nav__link">
+    Pillars
+  </a>
+  
+    <nav class="md-nav" aria-label="Pillars">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#template-data" class="md-nav__link">
+    Template Data
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -358,6 +492,61 @@
 <p>If you are familiar with Saltstack this should be a fairly straightfoward process, if you are however unfamiliar with Saltstack some additional learning will be required to get up to speed, to help with that there's a saltstack primer located in this documentation.</p>
 <h2 id="organization">Organization<a class="headerlink" href="#organization" title="Permanent link">&para;</a></h2>
 <p>The most important aspect of a Cast distro is how the salt states are organized. Typically speaking you'd have a directly, let's call it <code>example</code> and within it you'd define a state file <code>server.sls</code> and this file would do something like <code>pkg.install</code> of <code>htop</code>. However to allow Cast distributions to be required by other Cast distributions, we leave the creation of the folder <code>example</code> up to Cast, instead a manifest is defined to set the name of the project (aka base) of where all the files starting at the root of the repository will be extracted to. The primary purpose for this is to allow another distro to use <code>git submodules</code> to essentially include distro A into distro B.</p>
+<h2 id="manifest">Manifest<a class="headerlink" href="#manifest" title="Permanent link">&para;</a></h2>
+<p>The manifest is a file that is included with the releases assets on a GitHub Release that provides context to the installer for the distro.</p>
+<h3 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift</span><span class="w"></span>
+<span class="nt">base_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift</span><span class="w"></span>
+<span class="nt">modes</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">desktop</span><span class="w"></span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift.desktop</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">server</span><span class="w"></span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift.server</span><span class="w"></span>
+<span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">packages-only</span><span class="w"></span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift.server</span><span class="w"></span>
+<span class="w">    </span><span class="nt">deprecated</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">server</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">complete</span><span class="w"></span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift.desktop</span><span class="w"></span>
+<span class="w">    </span><span class="nt">deprecated</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="w">    </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">desktop</span><span class="w"></span>
+<span class="nt">supported_os</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu</span><span class="w"></span>
+<span class="w">    </span><span class="nt">release</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20.04</span><span class="w"></span>
+<span class="w">    </span><span class="nt">focal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">focal</span><span class="w"></span>
+<span class="nt">saltstack</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pillars</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">distro_user_template</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">.User</span><span class="nv"> </span><span class="s">}}&#39;</span><span class="w"></span>
+</code></pre></div>
+<h3 id="modes">Modes<a class="headerlink" href="#modes" title="Permanent link">&para;</a></h3>
+<p>Modes are essentially aliases and born from the original install tools from SIFT and REMnux. These <code>modes</code> allow for defining a single name alias like <code>desktop</code> to point to <code>sift.desktop</code></p>
+<h3 id="supported-operating-systems-os">Supported Operating Systems (OS)<a class="headerlink" href="#supported-operating-systems-os" title="Permanent link">&para;</a></h3>
+<p><code>SupportedOS</code> allows for defining what operating systems are officially supported by the distro.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">supported_os</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu</span><span class="w"></span>
+<span class="w">    </span><span class="nt">release</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20.04</span><span class="w"></span>
+<span class="w">    </span><span class="nt">focal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">focal</span><span class="w"></span>
+</code></pre></div>
+<h3 id="saltstack">SaltStack<a class="headerlink" href="#saltstack" title="Permanent link">&para;</a></h3>
+<p>The <code>saltstack</code> sections allows for configuring aspects of SaltStack. At this time it only allows for passing custom pillar data.</p>
+<h4 id="pillars">Pillars<a class="headerlink" href="#pillars" title="Permanent link">&para;</a></h4>
+<p>Pillars are essentially data that's made available to the SaltStack run, currently it only supports a <code>key: value</code> format, it does not support nested data.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The <code>_template</code> suffix has special meaning. It indicates a template variable, the value before the <code>_template</code> is the actual end result variable name. (eg <code>sift_user_template</code> becomes <code>sift_user</code>)</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="nt">saltstack</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">pillars</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">sift_user_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.User</span><span class="nv"> </span><span class="s">}}&quot;</span><span class="w"></span>
+</code></pre></div>
+<h5 id="template-data">Template Data<a class="headerlink" href="#template-data" title="Permanent link">&para;</a></h5>
+<p>This is the data available to the template process.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUDO_SUER</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>user, this is the CLI option <code>--user</code> but defaults to <code>SUDO_USER</code> environment variable, as the tool is only suppose to be run with sudo.</li>
+</ul>
 
               
             </article>
@@ -411,7 +600,7 @@
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.tabs"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.22074ed6.min.js"}</script>
     
     
-      <script src="../assets/javascripts/bundle.01de222e.min.js"></script>
+      <script src="../assets/javascripts/bundle.960e086b.min.js"></script>
       
     
   </body>
