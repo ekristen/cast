@@ -502,8 +502,6 @@ func (d *Distro) verifyRelease() error {
 		return err
 	}
 
-	fmt.Println(d.Manifest.Saltstack.Pillars)
-
 	return nil
 }
 

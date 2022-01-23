@@ -177,8 +177,6 @@ func (i *Installer) runSaltstack() error {
 		fmt.Sprintf(`pillar=%s`, i.pillarJSON),
 	}
 
-	fmt.Println(args)
-
 	if i.config.SaltStackTest {
 		args = append(args, "test=True")
 	}
