@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -42,6 +43,8 @@ type Installer struct {
 	logFile    string
 
 	command string
+
+	pillarJSON string
 }
 
 type Config struct {
@@ -54,6 +57,7 @@ type Config struct {
 	SaltStackLogLevel    string
 	SaltStackFileRoot    string
 	SaltStackInstallMode saltstack.Mode
+	SaltStackPillars     map[string]string
 }
 
 func New(ctx context.Context, config *Config) *Installer {
@@ -75,6 +79,13 @@ func (i *Installer) Run() (err error) {
 	if err := i.setup(); err != nil {
 		return err
 	}
+
+	i.log.Info("preparing pillar data")
+	pillarJSON, err := json.Marshal(i.config.SaltStackPillars)
+	if err != nil {
+		return err
+	}
+	i.pillarJSON = string(pillarJSON)
 
 	i.log.Debug("configuring saltstack installer")
 	sconfig := saltstack.NewConfig()
@@ -163,8 +174,10 @@ func (i *Installer) runSaltstack() error {
 		"--no-color",
 		"state.apply",
 		i.config.SaltStackState,
-		fmt.Sprintf(`pillar={sift_user: "%s"}`, i.config.SaltStackUser),
+		fmt.Sprintf(`pillar=%s`, i.pillarJSON),
 	}
+
+	fmt.Println(args)
 
 	if i.config.SaltStackTest {
 		args = append(args, "test=True")

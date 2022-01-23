@@ -43,7 +43,13 @@ func Execute(c *cli.Context) error {
 		distroVersion = distroParts[1]
 	}
 
-	distro, err := distro.New(ctx, distroName, &distroVersion, c.Bool("pre-release"), c.String("github-token"))
+	distroData := struct {
+		User string
+	}{
+		User: c.String("user"),
+	}
+
+	distro, err := distro.New(ctx, distroName, &distroVersion, c.Bool("pre-release"), c.String("github-token"), distroData)
 	if err != nil {
 		return err
 	}
@@ -92,6 +98,7 @@ func Execute(c *cli.Context) error {
 		SaltStackTest:     c.Bool("saltstack-test"),
 		SaltStackFileRoot: fileRoot,
 		SaltStackLogLevel: c.String("saltstack-log-level"),
+		SaltStackPillars:  distro.GetSaltstackPillars(),
 	}
 
 	instance := installer.New(ctx, config)

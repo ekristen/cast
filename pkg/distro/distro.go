@@ -26,7 +26,6 @@ import (
 	"github.com/google/go-github/v41/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
-	"gopkg.in/yaml.v3"
 
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
@@ -72,9 +71,11 @@ type Distro struct {
 	selected *github.RepositoryRelease
 
 	archiveName string
+
+	data interface{}
 }
 
-func New(ctx context.Context, distro string, version *string, includePreReleases bool, githubToken string) (*Distro, error) {
+func New(ctx context.Context, distro string, version *string, includePreReleases bool, githubToken string, data interface{}) (*Distro, error) {
 	var d *Distro
 	if v, ok := aliases[distro]; ok {
 		d = v
@@ -99,6 +100,7 @@ func New(ctx context.Context, distro string, version *string, includePreReleases
 	d.Name = fmt.Sprintf("%s_%s", d.Owner, d.Repo)
 
 	d.ctx = ctx
+	d.data = data
 
 	if githubToken != "" {
 		logrus.Debug("using authenticated github client")
@@ -127,6 +129,11 @@ func New(ctx context.Context, distro string, version *string, includePreReleases
 	}
 
 	return d, nil
+}
+
+func (d *Distro) GetSaltstackPillars() (pillars map[string]string) {
+	pillars = d.Manifest.Saltstack.Pillars
+	return d.Manifest.Saltstack.Pillars
 }
 
 func (d *Distro) GetName() string {
@@ -427,7 +434,8 @@ func (d *Distro) verifyRelease() error {
 				return err
 			}
 
-			if err := yaml.Unmarshal(contents, &d.Manifest); err != nil {
+			d.Manifest, err = ParseManifest(contents)
+			if err != nil {
 				return err
 			}
 
@@ -488,6 +496,13 @@ func (d *Distro) verifyRelease() error {
 	}
 
 	d.log.Info("operating system is supported")
+
+	d.log.Info("rendering manifest")
+	if err := d.Manifest.Render(d.data); err != nil {
+		return err
+	}
+
+	fmt.Println(d.Manifest.Saltstack.Pillars)
 
 	return nil
 }

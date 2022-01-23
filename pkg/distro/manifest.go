@@ -1,10 +1,25 @@
 package distro
 
-import "gopkg.in/yaml.v3"
+import (
+	"bytes"
+	"html/template"
+	"strings"
+
+	"gopkg.in/yaml.v3"
+)
+
+func ParseManifest(contents []byte) (m *Manifest, err error) {
+	if err := yaml.Unmarshal(contents, &m); err != nil {
+		return nil, err
+	}
+
+	return m, nil
+}
 
 type Manifest struct {
 	Version     int           `json:"version" yaml:"version" default:"2"`
-	Base        string        `json:"base" yaml:"base"`
+	Name        string        `json:"project_name" yaml:"project_name"`
+	Base        string        `json:"base_dir" yaml:"base_dir" default:"."`
 	Modes       []Mode        `json:"modes" yaml:"modes"`
 	Saltstack   Saltstack     `json:"saltstack,omitempty" yaml:"saltstack,omitempty"`
 	SupportedOS []SupportedOS `json:"supported_os,omitempty" yaml:"supported_os,omitempty"`
@@ -28,25 +43,23 @@ type Saltstack struct {
 	Pillars map[string]string `json:"pillars,omitempty" yaml:"pillars,omitempty"`
 }
 
-func ParseManifest(contents []byte) (m *Manifest, err error) {
-	/*
-		tmpl, err := template.New("manifest").Parse(string(contents))
-		if err != nil {
-			return nil, err
+func (m *Manifest) Render(data interface{}) error {
+	for name, val := range m.Saltstack.Pillars {
+		if strings.HasSuffix(name, "_template") {
+			tmpl, err := template.New("pillar_template").Parse(val)
+			if err != nil {
+				return err
+			}
+
+			var content bytes.Buffer
+			if err := tmpl.Execute(&content, data); err != nil {
+				return err
+			}
+
+			m.Saltstack.Pillars[strings.TrimSuffix(name, "_template")] = content.String()
+			delete(m.Saltstack.Pillars, name)
 		}
-
-		data := struct {
-		}{}
-
-		var content bytes.Buffer
-		if err := tmpl.Execute(&content, data); err != nil {
-			return nil, err
-		}
-	*/
-
-	if err := yaml.Unmarshal(contents, &m); err != nil {
-		return nil, err
 	}
 
-	return m, nil
+	return nil
 }

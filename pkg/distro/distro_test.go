@@ -9,28 +9,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var testData struct {
+	User string
+} = struct{ User string }{User: "test_user"}
+
 func Test_Distro_New_Alias(t *testing.T) {
-	dist, err := New(context.TODO(), "sift", nil, false, "")
+	dist, err := New(context.TODO(), "sift", nil, false, "", testData)
 	assert.NoError(t, err)
 
 	assert.GreaterOrEqual(t, len(dist.releases), 1)
 }
 
 func Test_Distro_New(t *testing.T) {
-	dist, err := New(context.TODO(), "ekristen/example-distro-saltstack", nil, false, "")
+	dist, err := New(context.TODO(), "ekristen/example-distro-saltstack", nil, false, "", testData)
 	assert.NoError(t, err)
 
 	assert.GreaterOrEqual(t, len(dist.releases), 1)
 }
 
 func Test_Distro_New_InvalidFormat(t *testing.T) {
-	_, err := New(context.TODO(), "example-distro-saltstack", nil, false, "")
+	_, err := New(context.TODO(), "example-distro-saltstack", nil, false, "", testData)
 	assert.Error(t, err)
 }
 
 func Test_Distro_New_SpecifiedVersion(t *testing.T) {
 	v := "v1.0.0"
-	_, err := New(context.TODO(), "ekristen/example-distro-saltstack", &v, false, "")
+	_, err := New(context.TODO(), "ekristen/example-distro-saltstack", &v, false, "", testData)
 	assert.NoError(t, err)
 }
 
@@ -41,7 +45,7 @@ func Test_Distro_Manifest_V1_Complete(t *testing.T) {
 
 	os.MkdirAll(dir, 0755)
 
-	dist, err := New(context.TODO(), "sift", nil, false, "")
+	dist, err := New(context.TODO(), "sift", nil, false, "", testData)
 	assert.NoError(t, err)
 
 	assert.Greater(t, len(dist.releases), 1)
@@ -60,7 +64,7 @@ func Test_Distro_Manifest_V2_Complete(t *testing.T) {
 
 	os.MkdirAll(dir, 0755)
 
-	dist, err := New(context.TODO(), "ekristen/example-distro-saltstack", nil, false, "")
+	dist, err := New(context.TODO(), "ekristen/example-distro-saltstack", nil, false, "", testData)
 	assert.NoError(t, err)
 
 	assert.GreaterOrEqual(t, len(dist.releases), 1)

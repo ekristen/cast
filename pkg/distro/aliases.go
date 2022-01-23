@@ -64,6 +64,11 @@ var manifests map[string]*Manifest = map[string]*Manifest{
 				Codename: "focal",
 			},
 		},
+		Saltstack: Saltstack{
+			Pillars: map[string]string{
+				"sift_user_template": "{{ .User }}",
+			},
+		},
 	},
 	"remnux": {
 		Version: 1,
@@ -83,6 +88,11 @@ var manifests map[string]*Manifest = map[string]*Manifest{
 				Name:    "cloud",
 				State:   "remnux.cloud",
 				Default: false,
+			},
+		},
+		Saltstack: Saltstack{
+			Pillars: map[string]string{
+				"remnux_user_template": "{{ .User }}",
 			},
 		},
 	},
