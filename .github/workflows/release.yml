@@ -40,6 +40,11 @@ jobs:
           echo "${COSIGN_KEY}" > "$GITHUB_WORKSPACE/cosign.key"
         env:
           COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+      - name: Setup PGP
+        run: |
+          echo "${PGP_KEY}" > "$GITHUB_WORKSPACE/pgp.key"
+        env:
+          PGP_KEY: ${{ secrets.NFPM_GPG_KEY }}
       - name: Set GoReleaser Default Args
         if: startsWith(github.ref, 'refs/tags/') == true
         run: |
@@ -57,6 +62,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          NFPM_GPG_KEY: "./pgp.key"
+          NFPM_CAST_PASSPHRASE: ${{ secrets.NFPM_CAST_PASSPHRASE }}
       - name: Save Release Files
         uses: actions/upload-artifact@v2
         if: startsWith(github.ref, 'refs/tags/') == false
