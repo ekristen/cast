@@ -1,8 +1,10 @@
+dist: release
 release:
   github:
     owner: ekristen
     name: cast
-dist: release
+  extra_files:
+    - glob: "./*.pub"
 env:
   - CGO_ENABLED=0
 builds:
@@ -53,6 +55,22 @@ signs:
     args:
       ["sign-blob", "--key=cosign.key", "--output=${signature}", "${artifact}"]
     artifacts: all
+nfpms:
+  - id: cast
+    package_name: cast
+    builds:
+      - cast
+    vendor: ekristen.dev
+    homepage: https://github.com/ekristen/cast
+    maintainer: Erik Kristensen <erik@erikkristensen.com>
+    description: Cast is an installer tool for any Cast compatible distro
+    license: MIT
+    formats:
+      - deb
+    deb:
+      signature:
+        key_file: "{{ .Env.NFPM_GPG_KEY }}"
+        type: origin
 checksum:
   name_template: "checksums.txt"
 snapshot:

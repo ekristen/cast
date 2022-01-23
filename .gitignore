@@ -1,4 +1,4 @@
 .envrc
-cosign.key
+*.key
 /release
 /releases
