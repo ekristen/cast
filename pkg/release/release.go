@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Masterminds/semver"
 	"github.com/ekristen/cast/pkg/config"
 	"github.com/ekristen/cast/pkg/git"
 	"github.com/ekristen/cast/pkg/utils"
@@ -41,13 +42,23 @@ type Artifact struct {
 	Path string `json:"path,omitempty"`
 }
 
-func Run(ctx context.Context, configFile string, githubToken string, tag string) (err error) {
+type RunConfig struct {
+	ConfigFile   string
+	GitHubToken  string
+	Tag          string
+	CosignKey    string
+	LegacySign   bool
+	LegacyPGPKey string
+	DryRun       bool
+}
+
+func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 	var dl *http.Client
 	var gh *github.Client
 
 	log := logrus.WithField("component", "release").WithField("handler", "run")
 
-	cfg, err := config.Load(configFile)
+	cfg, err := config.Load(runConfig.ConfigFile)
 	if err != nil {
 		return err
 	}
@@ -56,33 +67,39 @@ func Run(ctx context.Context, configFile string, githubToken string, tag string)
 		return fmt.Errorf("not a git repo")
 	}
 
-	if tag == "" {
-		tag, err = git.Clean(git.Run(ctx, "describe", "--tags"))
+	if runConfig.Tag == "" {
+		runConfig.Tag, err = git.Clean(git.Run(ctx, "describe", "--tags"))
 		if err != nil {
 			return err
 		}
 	}
 
-	if exists, err := utils.FileExists("cosign.key"); err != nil {
+	v, err := semver.NewVersion(strings.TrimPrefix(runConfig.Tag, "v"))
+	if err != nil {
+		return err
+	}
+
+	if exists, err := utils.FileExists(runConfig.CosignKey); err != nil {
 		return err
 	} else if !exists {
 		return fmt.Errorf("cosign.key not found")
 	}
 
-	if exists, err := utils.FileExists("cosign.pub"); err != nil {
+	cosignPub := strings.ReplaceAll(runConfig.CosignKey, ".key", ".pub")
+	if exists, err := utils.FileExists(cosignPub); err != nil {
 		return err
 	} else if !exists {
 		return fmt.Errorf("cosign.pub not found")
 	}
 
-	if githubToken != "" {
+	if runConfig.GitHubToken != "" {
 		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: githubToken},
+			&oauth2.Token{AccessToken: runConfig.GitHubToken},
 		)
 
 		gh = github.NewClient(oauth2.NewClient(ctx, ts))
 		dl = &http.Client{
-			Transport: &transport{token: githubToken, underlyingTransport: http.DefaultTransport},
+			Transport: &transport{token: runConfig.GitHubToken, underlyingTransport: http.DefaultTransport},
 		}
 	} else {
 		gh = github.NewClient(nil)
@@ -90,8 +107,9 @@ func Run(ctx context.Context, configFile string, githubToken string, tag string)
 
 	log.Info("fetching current release")
 
-	release, _, err := gh.Repositories.GetReleaseByTag(ctx, cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, tag)
+	release, _, err := gh.Repositories.GetReleaseByTag(ctx, cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, runConfig.Tag)
 	if err != nil && !strings.Contains(err.Error(), "404 Not Found") {
+		fmt.Println(err.Error())
 		return err
 	}
 
@@ -100,9 +118,15 @@ func Run(ctx context.Context, configFile string, githubToken string, tag string)
 	}
 
 	release, _, err = gh.Repositories.CreateRelease(ctx, cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, &github.RepositoryRelease{
-		TagName: github.String(tag),
-		Name:    github.String(tag),
+		TagName:    github.String(runConfig.Tag),
+		Name:       github.String(runConfig.Tag),
+		Prerelease: github.Bool(v.Prerelease() != ""),
 	})
+	if err != nil {
+		return err
+	}
+
+	// TODO: check if valid release
 
 	dir, err := ioutil.TempDir(os.TempDir(), "release-")
 	if err != nil {
@@ -140,23 +164,29 @@ func Run(ctx context.Context, configFile string, githubToken string, tag string)
 		Path: checksumsFile.Name(),
 	})
 
-	log.Info("checksumming tarball")
+	log.Info("downloading tarball")
 
 	filename, err := downloadFile(release.GetTarballURL(), dir, dl, nil)
 	if err != nil {
 		return err
 	}
 
+	log.Debugf("tarball filename: %s", filename)
+
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
 	}
 
+	log.Info("checksumming tarball")
+
 	hasher := sha512.New()
 	hasher.Write(b)
 	checksum := fmt.Sprintf("%x", hasher.Sum(nil))
 
-	checksumsFile.Write([]byte(fmt.Sprintf("%s %s\n", checksum, filepath.Base(filename))))
+	checksumFileLine := fmt.Sprintf("%s %s\n", checksum, filepath.Base(filename))
+
+	checksumsFile.Write([]byte(checksumFileLine))
 
 	log.Info("checksumming manifest.yml")
 
@@ -197,11 +227,66 @@ func Run(ctx context.Context, configFile string, githubToken string, tag string)
 
 	artifacts = append(artifacts, Artifact{
 		Name: "cosign.pub",
-		Path: "cosign.pub",
+		Path: cosignPub,
 	})
 
+	if runConfig.LegacySign {
+		log.Info("legacy: downloading legacy tar.gz")
+		archiveURL := fmt.Sprintf("https://github.com/%s/%s/archive/%s.tar.gz", cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, runConfig.Tag)
+
+		filename, err := downloadFile(archiveURL, dir, dl, nil)
+		if err != nil {
+			return err
+		}
+
+		targzFilename := filepath.Base(filename)
+		targzSigFilename := fmt.Sprintf("%s.asc", targzFilename)
+
+		legacyChecksumFilename := fmt.Sprintf("%s.sha256", targzFilename)
+		legacyChecksumPath := filepath.Join(dir, legacyChecksumFilename)
+		if err := ioutil.WriteFile(legacyChecksumPath, []byte(checksumFileLine), 0644); err != nil {
+			return err
+		}
+
+		log.Info("legacy: writing checksum file")
+
+		legacyChecksumSignFilename := fmt.Sprintf("%s.asc", legacyChecksumFilename)
+
+		pgpPrivateKey, err := ioutil.ReadFile(runConfig.LegacyPGPKey)
+		if err != nil {
+			return err
+		}
+
+		log.Info("legacy: signing checksum file")
+		if err := utils.GPGSign(dir, legacyChecksumFilename, legacyChecksumSignFilename, pgpPrivateKey); err != nil {
+			return err
+		}
+
+		log.Info("legacy: signing tar.gz")
+		if err := utils.GPGSign(dir, targzFilename, targzSigFilename, pgpPrivateKey); err != nil {
+			return err
+		}
+
+		legacyArtifacts := []Artifact{
+			{
+				Name: legacyChecksumFilename,
+				Path: legacyChecksumPath,
+			},
+			{
+				Name: legacyChecksumSignFilename,
+				Path: filepath.Join(dir, legacyChecksumSignFilename),
+			},
+			{
+				Name: targzSigFilename,
+				Path: filepath.Join(dir, targzSigFilename),
+			},
+		}
+
+		artifacts = append(artifacts, legacyArtifacts...)
+	}
+
 	for _, a := range artifacts {
-		log.Infof("uploading release asset: %s", a.Name)
+		log.WithField("file", a.Name).Infof("uploading release asset")
 
 		f, err := os.Open(a.Path)
 		if err != nil {

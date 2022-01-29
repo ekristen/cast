@@ -22,7 +22,17 @@ func Execute(c *cli.Context) error {
 		defer os.Chdir(cwd)
 	}
 
-	if err := release.Run(c.Context, c.Path("config"), c.String("github-token"), c.String("tag")); err != nil {
+	config := &release.RunConfig{
+		ConfigFile:   c.Path("config"),
+		GitHubToken:  c.String("github-token"),
+		Tag:          c.String("tag"),
+		CosignKey:    c.Path("cosign-key"),
+		LegacySign:   c.Bool("legacy-pgp-sign"),
+		LegacyPGPKey: c.Path("legacy-pgp-key"),
+		DryRun:       c.Bool("dry-run"),
+	}
+
+	if err := release.Run(c.Context, config); err != nil {
 		return err
 	}
 
@@ -38,6 +48,20 @@ func init() {
 		&cli.StringFlag{
 			Name:    "github-token",
 			EnvVars: []string{"GITHUB_TOKEN"},
+		},
+		&cli.PathFlag{
+			Name:  "cosign-key",
+			Value: "cosign.key",
+		},
+		&cli.BoolFlag{
+			Name: "legacy-pgp-sign",
+		},
+		&cli.PathFlag{
+			Name:  "legacy-pgp-key",
+			Value: "pgp.key",
+		},
+		&cli.BoolFlag{
+			Name: "dry-run",
 		},
 		&cli.StringFlag{
 			Name:   "tag",
