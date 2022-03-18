@@ -3,6 +3,7 @@ package release
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
 	"io"
@@ -109,7 +110,7 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	release, _, err := gh.Repositories.GetReleaseByTag(ctx, cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, runConfig.Tag)
 	if err != nil && !strings.Contains(err.Error(), "404 Not Found") {
-		fmt.Println(err.Error())
+		log.WithError(err).Error("unable to fetch release by tag")
 		return err
 	}
 
@@ -117,12 +118,17 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 		return fmt.Errorf("release already exists, use --overwrite to delete the release first")
 	}
 
-	release, _, err = gh.Repositories.CreateRelease(ctx, cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, &github.RepositoryRelease{
+	releaseOpts := &github.RepositoryRelease{
 		TagName:    github.String(runConfig.Tag),
 		Name:       github.String(runConfig.Tag),
 		Prerelease: github.Bool(v.Prerelease() != ""),
-	})
+	}
+
+	log.Debug("release config", releaseOpts)
+
+	release, _, err = gh.Repositories.CreateRelease(ctx, cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, releaseOpts)
 	if err != nil {
+		log.WithError(err).Error("unable to create release for tag")
 		return err
 	}
 
@@ -173,15 +179,19 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	log.Debugf("tarball filename: %s", filename)
 
-	b, err := ioutil.ReadFile(filename)
+	log.Info("checksumming tarball")
+	tf, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
-
-	log.Info("checksumming tarball")
+	defer tf.Close()
 
 	hasher := sha512.New()
-	hasher.Write(b)
+
+	if _, err := io.Copy(hasher, tf); err != nil {
+		return err
+	}
+
 	checksum := fmt.Sprintf("%x", hasher.Sum(nil))
 
 	checksumFileLine := fmt.Sprintf("%s %s\n", checksum, filepath.Base(filename))
@@ -234,17 +244,47 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 		log.Info("legacy: downloading legacy tar.gz")
 		archiveURL := fmt.Sprintf("https://github.com/%s/%s/archive/%s.tar.gz", cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, runConfig.Tag)
 
+		log.WithField("url", archiveURL).Debug("legacy: archive url")
+
 		filename, err := downloadFile(archiveURL, dir, dl, nil)
 		if err != nil {
 			return err
 		}
 
-		targzFilename := filepath.Base(filename)
-		targzSigFilename := fmt.Sprintf("%s.asc", targzFilename)
+		log.WithField("filename", filename).Debug("legacy: tarball filename")
 
-		legacyChecksumFilename := fmt.Sprintf("%s.sha256", targzFilename)
+		targzFilename := filepath.Base(filename)
+		log.WithField("filename", targzFilename).Debug("legacy: tar.gz filename")
+
+		targzNewFilename := targzFilename
+
+		if !strings.Contains(targzNewFilename, runConfig.Tag) {
+			targzNewFilename = strings.ReplaceAll(targzNewFilename, v.String(), runConfig.Tag)
+		}
+
+		targzSigFilename := fmt.Sprintf("%s.asc", targzNewFilename)
+
+		log.Info("legacy: hashing legacy tar.gz")
+
+		tf2, err := os.Open(filename)
+		if err != nil {
+			return err
+		}
+		defer tf2.Close()
+
+		hasher256 := sha256.New()
+		if _, err := io.Copy(hasher256, tf2); err != nil {
+			return err
+		}
+		checksum256 := fmt.Sprintf("%x", hasher256.Sum(nil))
+
+		log.WithField("sha256", checksum256).Debug("legacy: sha256 value")
+
+		checksum256FileLine := fmt.Sprintf("%s  /tmp/%s\n", checksum256, targzNewFilename)
+
+		legacyChecksumFilename := fmt.Sprintf("%s.sha256", targzNewFilename)
 		legacyChecksumPath := filepath.Join(dir, legacyChecksumFilename)
-		if err := ioutil.WriteFile(legacyChecksumPath, []byte(checksumFileLine), 0644); err != nil {
+		if err := ioutil.WriteFile(legacyChecksumPath, []byte(checksum256FileLine), 0644); err != nil {
 			return err
 		}
 
@@ -258,12 +298,12 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 		}
 
 		log.Info("legacy: signing checksum file")
-		if err := utils.GPGSign(dir, legacyChecksumFilename, legacyChecksumSignFilename, pgpPrivateKey); err != nil {
+		if err := utils.GPGSign(dir, legacyChecksumFilename, legacyChecksumSignFilename, pgpPrivateKey, false); err != nil {
 			return err
 		}
 
 		log.Info("legacy: signing tar.gz")
-		if err := utils.GPGSign(dir, targzFilename, targzSigFilename, pgpPrivateKey); err != nil {
+		if err := utils.GPGSign(dir, targzFilename, targzSigFilename, pgpPrivateKey, true); err != nil {
 			return err
 		}
 

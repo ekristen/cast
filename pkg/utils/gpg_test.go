@@ -148,7 +148,7 @@ func Test_GPGSign(t *testing.T) {
 	bigBuff := make([]byte, 5000000)
 	ioutil.WriteFile("bigfile.test", bigBuff, 0666)
 
-	err = GPGSign(dir, "bigfile.test", "testing.key", []byte(PrivatePGPKey))
+	err = GPGSign(dir, "bigfile.test", "bigfile.test.asc", []byte(PrivatePGPKey), true)
 	assert.NoError(t, err)
 
 	_, err = FileExists("bigfile.text.asc")
