@@ -23,6 +23,8 @@ func Execute(c *cli.Context) error {
 	}
 
 	config := &release.RunConfig{
+		DistDir:      c.Path("dist"),
+		RmDist:       c.Bool("rm-dist"),
 		ConfigFile:   c.Path("config"),
 		GitHubToken:  c.String("github-token"),
 		Tag:          c.String("tag"),
@@ -42,6 +44,10 @@ func Execute(c *cli.Context) error {
 func init() {
 	flags := []cli.Flag{
 		&cli.PathFlag{
+			Name:  "dist",
+			Value: "dist",
+		},
+		&cli.PathFlag{
 			Name:  "config",
 			Value: ".cast.yml",
 		},
@@ -59,6 +65,9 @@ func init() {
 		&cli.PathFlag{
 			Name:  "legacy-pgp-key",
 			Value: "pgp.key",
+		},
+		&cli.BoolFlag{
+			Name: "rm-dist",
 		},
 		&cli.BoolFlag{
 			Name: "dry-run",

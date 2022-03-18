@@ -20,6 +20,7 @@ import (
 	"github.com/ekristen/cast/pkg/git"
 	"github.com/ekristen/cast/pkg/utils"
 	"github.com/google/go-github/v41/github"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v3"
@@ -44,6 +45,8 @@ type Artifact struct {
 }
 
 type RunConfig struct {
+	DistDir      string
+	RmDist       bool
 	ConfigFile   string
 	GitHubToken  string
 	Tag          string
@@ -59,9 +62,19 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	log := logrus.WithField("component", "release").WithField("handler", "run")
 
+	if exists, err := utils.FileExists(runConfig.DistDir); err != nil {
+		return errors.Wrap(err, "error checking if file exists")
+	} else if exists && !runConfig.RmDist {
+		return fmt.Errorf("dist exists and --rm-dist not specified")
+	}
+
 	cfg, err := config.Load(runConfig.ConfigFile)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable to load config")
+	}
+
+	if err := cfg.Validate(); err != nil {
+		return errors.Wrap(err, "config validation failure")
 	}
 
 	if !git.IsRepo(ctx) {
@@ -71,17 +84,17 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 	if runConfig.Tag == "" {
 		runConfig.Tag, err = git.Clean(git.Run(ctx, "describe", "--tags"))
 		if err != nil {
-			return err
+			return errors.Wrap(err, "unable to obtain git tag")
 		}
 	}
 
 	v, err := semver.NewVersion(strings.TrimPrefix(runConfig.Tag, "v"))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable to parse semver")
 	}
 
 	if exists, err := utils.FileExists(runConfig.CosignKey); err != nil {
-		return err
+		return errors.Wrap(err, "unable to open cosign key")
 	} else if !exists {
 		return fmt.Errorf("cosign.key not found")
 	}
@@ -103,15 +116,14 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 			Transport: &transport{token: runConfig.GitHubToken, underlyingTransport: http.DefaultTransport},
 		}
 	} else {
-		gh = github.NewClient(nil)
+		return fmt.Errorf("unable to perform release without a valid github token")
 	}
 
 	log.Info("fetching current release")
 
 	release, _, err := gh.Repositories.GetReleaseByTag(ctx, cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, runConfig.Tag)
 	if err != nil && !strings.Contains(err.Error(), "404 Not Found") {
-		log.WithError(err).Error("unable to fetch release by tag")
-		return err
+		return errors.Wrap(err, "unable to fetch release by tag")
 	}
 
 	if release != nil {
@@ -128,17 +140,22 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	release, _, err = gh.Repositories.CreateRelease(ctx, cfg.Release.GitHub.Owner, cfg.Release.GitHub.Repo, releaseOpts)
 	if err != nil {
-		log.WithError(err).Error("unable to create release for tag")
-		return err
+		return errors.Wrap(err, "unable to create release for tag")
 	}
 
 	// TODO: check if valid release
 
-	dir, err := ioutil.TempDir(os.TempDir(), "release-")
-	if err != nil {
-		return err
+	/*
+		dir, err := ioutil.TempDir(os.TempDir(), "release-")
+		if err != nil {
+			return errors.Wrap(err, "unable to create temp directory")
+		}
+		defer os.RemoveAll(dir)
+	*/
+	dir := runConfig.DistDir
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return errors.Wrap(err, "unable to mkdirp")
 	}
-	defer os.RemoveAll(dir)
 
 	artifacts := []Artifact{}
 
@@ -148,11 +165,13 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	md, err := yaml.Marshal(cfg.Manifest)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable to parse manifest")
 	}
 
+	// TODO: validate manifest?
+
 	if err := ioutil.WriteFile(mfilename, md, 0644); err != nil {
-		return err
+		return errors.Wrap(err, "unable to write manifest file")
 	}
 
 	artifacts = append(artifacts, Artifact{
@@ -162,7 +181,7 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	checksumsFile, err := os.OpenFile(filepath.Join(dir, "checksums.txt"), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable to open checksum file")
 	}
 
 	artifacts = append(artifacts, Artifact{
@@ -174,7 +193,7 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	filename, err := downloadFile(release.GetTarballURL(), dir, dl, nil)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable to download tarball")
 	}
 
 	log.Debugf("tarball filename: %s", filename)
@@ -182,14 +201,13 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 	log.Info("checksumming tarball")
 	tf, err := os.Open(filename)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable to open tarball for checksumming")
 	}
 	defer tf.Close()
 
 	hasher := sha512.New()
-
 	if _, err := io.Copy(hasher, tf); err != nil {
-		return err
+		return errors.Wrap(err, "unable to copy file to hasher512")
 	}
 
 	checksum := fmt.Sprintf("%x", hasher.Sum(nil))
@@ -202,7 +220,7 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	d, err := ioutil.ReadFile(mfilename)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "unable to open manifest file")
 	}
 
 	hasher = sha512.New()
@@ -248,7 +266,7 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 		filename, err := downloadFile(archiveURL, dir, dl, nil)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "unable to download legacy archive file")
 		}
 
 		log.WithField("filename", filename).Debug("legacy: tarball filename")
@@ -257,7 +275,6 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 		log.WithField("filename", targzFilename).Debug("legacy: tar.gz filename")
 
 		targzNewFilename := targzFilename
-
 		if !strings.Contains(targzNewFilename, runConfig.Tag) {
 			targzNewFilename = strings.ReplaceAll(targzNewFilename, v.String(), runConfig.Tag)
 		}
@@ -268,13 +285,13 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 		tf2, err := os.Open(filename)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "unable to open legacy tar.gz file")
 		}
 		defer tf2.Close()
 
 		hasher256 := sha256.New()
 		if _, err := io.Copy(hasher256, tf2); err != nil {
-			return err
+			return errors.Wrap(err, "unable to copy to hasher256")
 		}
 		checksum256 := fmt.Sprintf("%x", hasher256.Sum(nil))
 
@@ -299,12 +316,12 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 		log.Info("legacy: signing checksum file")
 		if err := utils.GPGSign(dir, legacyChecksumFilename, legacyChecksumSignFilename, pgpPrivateKey, false); err != nil {
-			return err
+			return errors.Wrap(err, "unable to sign checksum file")
 		}
 
 		log.Info("legacy: signing tar.gz")
 		if err := utils.GPGSign(dir, targzFilename, targzSigFilename, pgpPrivateKey, true); err != nil {
-			return err
+			return errors.Wrap(err, "unable to sign archive file")
 		}
 
 		legacyArtifacts := []Artifact{
