@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v2/helper"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
@@ -102,7 +104,7 @@ func GPGVerify(dir, filename, checksumFilename string, pgpPublicKey []byte) erro
 	return nil
 }
 
-func GPGSign(dir, filename, signatureFile string, pgpPrivateKey []byte) error {
+func GPGSign(dir, filename, signatureFile string, pgpPrivateKey []byte, detached bool) error {
 	filename = filepath.Join(dir, filename)
 	signatureFile = filepath.Join(dir, signatureFile)
 
@@ -125,26 +127,50 @@ func GPGSign(dir, filename, signatureFile string, pgpPrivateKey []byte) error {
 		return errors.New("invalid public key")
 	}
 
-	message, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer message.Close()
-
 	w, err := os.Create(signatureFile)
 	if err != nil {
 		return err
 	}
 	defer w.Close()
 
-	if err := openpgp.ArmoredDetachSign(w, &openpgp.Entity{
-		PrimaryKey: &privateKey.PublicKey,
-		PrivateKey: privateKey,
-	}, message, nil); err != nil {
-		return err
+	if detached {
+		message, err := os.Open(filename)
+		if err != nil {
+			return err
+		}
+		defer message.Close()
+
+		if err := openpgp.ArmoredDetachSignText(w, &openpgp.Entity{
+			PrimaryKey: &privateKey.PublicKey,
+			PrivateKey: privateKey,
+		}, message, nil); err != nil {
+			logrus.WithError(err).Error("unable to sign armored detached")
+			return err
+		}
+		w.Write([]byte("\n"))
+	} else {
+		message, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return err
+		}
+
+		signingKey, err := crypto.NewKeyFromArmored(string(pgpPrivateKey))
+		if err != nil {
+			return err
+		}
+
+		keyRing, err := crypto.NewKeyRing(signingKey)
+		if err != nil {
+			return err
+		}
+
+		armored, err := helper.SignCleartextMessage(keyRing, string(message))
+		if err != nil {
+			return err
+		}
+		w.Write([]byte(armored))
+		w.Write([]byte("\n"))
 	}
-	w.Write([]byte("\n"))
 
 	return nil
-
 }

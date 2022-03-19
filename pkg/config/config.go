@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/ekristen/cast/pkg/distro"
@@ -8,7 +9,7 @@ import (
 )
 
 type Config struct {
-	Release  Release         `yaml:"release,omitempty"`
+	Release  Release         `yaml:"release"`
 	Manifest distro.Manifest `yaml:"manifest"`
 }
 
@@ -39,4 +40,14 @@ func Load(configFile string) (cfg *Config, err error) {
 	}
 
 	return cfg, err
+}
+
+func (c *Config) Validate() error {
+	if c.Release.GitHub.Owner == "" {
+		return fmt.Errorf("release.github.owner must be set")
+	}
+	if c.Release.GitHub.Repo == "" {
+		return fmt.Errorf("release.github.repo must be set")
+	}
+	return nil
 }
