@@ -66,6 +66,10 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 		return errors.Wrap(err, "error checking if file exists")
 	} else if exists && !runConfig.RmDist {
 		return fmt.Errorf("dist exists and --rm-dist not specified")
+	} else if exists && runConfig.RmDist {
+		if err := os.RemoveAll(runConfig.DistDir); err != nil {
+			return errors.Wrap(err, "unable to remove dist dir")
+		}
 	}
 
 	cfg, err := config.Load(runConfig.ConfigFile)
