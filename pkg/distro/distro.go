@@ -185,7 +185,7 @@ func (d *Distro) DownloadAssets(dir string) error {
 	if d.Manifest.Version == 1 {
 		d.archiveName = fmt.Sprintf("%s-%s.tar.gz", d.Repo, d.GetReleaseName())
 
-		if d.Owner == "remnux" && d.Repo == "salt-states" {
+		if (d.Owner == "remnux" && d.Repo == "salt-states") || (d.Owner == "digitalsleuth" && d.Repo == "mat-salt") {
 			d.archiveName = fmt.Sprintf("%s-%s-%s.tar.gz", d.Owner, d.Repo, d.GetReleaseName())
 		}
 	}

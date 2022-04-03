@@ -25,6 +25,18 @@ var aliases map[string]*Distro = map[string]*Distro{
 		Alias:   "remnux",
 		IsAlias: true,
 	},
+        "mat": {
+                Owner:   "digitalsleuth",
+                Repo:    "mat-salt",
+                Alias:   "mat",
+                IsAlias: true,
+        },
+        "digitalsleuth/mat-salt": {
+                Owner:   "digitalsleuth",
+                Repo:    "mat-salt",
+                Alias:   "mat",
+                IsAlias: true,
+        },
 }
 
 var manifests map[string]*Manifest = map[string]*Manifest{
@@ -96,4 +108,33 @@ var manifests map[string]*Manifest = map[string]*Manifest{
 			},
 		},
 	},
+        "mat": {
+                Version: 1,
+                Base:    "",
+                Modes: []Mode{
+                        {
+                                Name:    "dedicated",
+                                State:   "mat.dedicated",
+                                Default: false,
+                        },
+                        {
+                                Name:    "addon",
+                                State:   "mat.addon",
+                                Default: true,
+                        },
+                },
+                SupportedOS: []SupportedOS{
+                        {
+                                ID:       "ubuntu",
+                                Release:  "20.04",
+                                Codename: "focal",
+                        },
+                },
+                Saltstack: Saltstack{
+                        Pillars: map[string]string{
+                                "mat_user_template": "{{ .User }}",
+                        },
+                },
+        },
+
 }
