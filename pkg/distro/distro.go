@@ -413,8 +413,21 @@ func (d *Distro) fetchReleases(ctx context.Context) error {
 	}
 
 	d.releases = allreleases
+	if d.Version != "" {
+		for _, r := range d.releases {
+			if r.GetTagName() == d.Version {
+				d.selected = r
+			}
+		}
 
-	d.selected = d.releases[0]
+		if d.selected == nil {
+			err := fmt.Errorf("unable to find releases: %s", d.Version)
+			d.log.WithError(err).Error("unable to find release")
+			return err
+		}
+	} else {
+		d.selected = d.releases[0]
+	}
 
 	return nil
 }

@@ -43,6 +43,8 @@ func Execute(c *cli.Context) error {
 		distroVersion = distroParts[1]
 	}
 
+	log.WithField("name", distroName).WithField("version", distroVersion).Debug("detected distro information")
+
 	distroData := struct {
 		User string
 	}{
