@@ -48,7 +48,7 @@ func Execute(c *cli.Context) error {
 		`--name=cast-state`,
 		fmt.Sprintf("--volume=%s:/srv/salt/%s", cwd, cfg.Manifest.Base),
 		`--cap-add=SYS_ADMIN`,
-		"teamdfir/sift-saltstack-tester:focal",
+		c.String("image"),
 		"salt-call", "-l", "debug", "--local", "--retcode-passthrough",
 		"--state-output=mixed", "state.sls", state,
 	}
@@ -73,6 +73,15 @@ func init() {
 		&cli.PathFlag{
 			Name:   "dir",
 			Hidden: true,
+		},
+		&cli.StringFlag{
+			Name:    "user",
+			Usage:   "The user to install against (cannot be root)",
+			EnvVars: []string{"SUDO_USER"},
+		},
+		&cli.StringFlag{
+			Name:  "image",
+			Value: "ghcr.io/cast-tools/saltstack-tester:focal-3004",
 		},
 	}
 

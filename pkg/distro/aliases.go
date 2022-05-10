@@ -1,6 +1,6 @@
 package distro
 
-var aliases map[string]*Distro = map[string]*Distro{
+var aliases map[string]*GitHubDistro = map[string]*GitHubDistro{
 	"sift": {
 		Owner:   "teamdfir",
 		Repo:    "sift-saltstack",
@@ -30,7 +30,8 @@ var aliases map[string]*Distro = map[string]*Distro{
 var manifests map[string]*Manifest = map[string]*Manifest{
 	"sift": {
 		Version: 1,
-		Base:    "",
+		Name:    "sift",
+		Base:    "sift",
 		Modes: []Mode{
 			{
 				Name:    "desktop",
@@ -72,7 +73,8 @@ var manifests map[string]*Manifest = map[string]*Manifest{
 	},
 	"remnux": {
 		Version: 1,
-		Base:    "",
+		Name:    "remnux",
+		Base:    "remnux",
 		Modes: []Mode{
 			{
 				Name:    "dedicated",

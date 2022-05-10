@@ -35,7 +35,17 @@ func Execute(c *cli.Context) error {
 		return err
 	}
 
+	isLocal := false
 	distroName := c.Args().First()
+
+	if _, err := os.Stat(distroName); !os.IsNotExist(err) {
+		isLocal = true
+	} else if err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+	}
+
 	distroParts := strings.Split(distroName, "@")
 	distroVersion := ""
 	if len(distroParts) == 2 {
@@ -43,27 +53,35 @@ func Execute(c *cli.Context) error {
 		distroVersion = distroParts[1]
 	}
 
-	log.WithField("name", distroName).WithField("version", distroVersion).Debug("detected distro information")
-
 	distroData := struct {
 		User string
 	}{
 		User: c.String("user"),
 	}
 
-	distro, err := distro.New(ctx, distroName, &distroVersion, c.Bool("pre-release"), c.String("github-token"), distroData)
-	if err != nil {
-		return err
+	var dist distro.Distro
+	if isLocal {
+		log.WithField("name", distroName).WithField("version", distroVersion).Debug("detected distro information")
+
+		dist, err = distro.NewLocal(ctx, distroName, &distroVersion, c.Bool("pre-release"), c.String("github-token"), distroData)
+		if err != nil {
+			return err
+		}
+	} else {
+		dist, err = distro.NewGitHub(ctx, distroName, &distroVersion, c.Bool("pre-release"), c.String("github-token"), distroData)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Info("distro validated successfully")
 
-	distroCache, err := cache.NewSubpath(distro.GetCachePath())
+	distroCache, err := cache.NewSubpath(dist.GetCachePath())
 	if err != nil {
 		return err
 	}
 
-	if err := distro.Download(distroCache.GetPath()); err != nil {
+	if err := dist.Download(distroCache.GetPath()); err != nil {
 		return err
 	}
 
@@ -78,7 +96,7 @@ func Execute(c *cli.Context) error {
 	if state == "" {
 		mode := c.String("mode")
 		log.Infof("installing using mode: %s", mode)
-		state, err = distro.GetModeState(mode)
+		state, err = dist.GetModeState(mode)
 		if err != nil {
 			return err
 		}
@@ -88,7 +106,7 @@ func Execute(c *cli.Context) error {
 
 	fileRoot := c.Path("saltstack-file-root")
 	if fileRoot == "" {
-		fileRoot = filepath.Join(distroCache.GetPath(), "source")
+		fileRoot = filepath.Join(distroCache.GetPath(), dist.GetCacheSaltStackSourcePath())
 	}
 
 	config := &installer.Config{
@@ -100,7 +118,7 @@ func Execute(c *cli.Context) error {
 		SaltStackTest:     c.Bool("saltstack-test"),
 		SaltStackFileRoot: fileRoot,
 		SaltStackLogLevel: c.String("saltstack-log-level"),
-		SaltStackPillars:  distro.GetSaltstackPillars(),
+		SaltStackPillars:  dist.GetSaltstackPillars(),
 	}
 
 	instance := installer.New(ctx, config)
@@ -137,6 +155,7 @@ func init() {
 		&cli.StringFlag{
 			Name:  "mode",
 			Usage: "If the distro supports a mode, you can specify it for install",
+			Value: "default",
 		},
 		&cli.StringFlag{
 			Name:    "user",

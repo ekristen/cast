@@ -14,8 +14,10 @@ The manifest is a file that is included with the releases assets on a GitHub Rel
 
 ### Specification
 
+**Note:** `base_dir` is if the base of the salt states are in a directory other than the root of the project.
+
 ```yaml
-project_name: sift
+name: sift
 base_dir: sift
 modes:
   - name: desktop
