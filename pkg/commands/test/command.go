@@ -81,7 +81,7 @@ func init() {
 		},
 		&cli.StringFlag{
 			Name:  "image",
-			Value: "ghcr.io/cast-tools/saltstack-tester:focal-3004",
+			Value: "ghcr.io/ekristen/cast-tools/saltstack-tester:focal-3004",
 		},
 	}
 
