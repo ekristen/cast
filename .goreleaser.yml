@@ -24,7 +24,7 @@ archives:
   - id: cast
     builds:
       - cast
-    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ .Arm }}"
+    name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ .Arm }}"
     format_overrides:
       - goos: windows
         format: zip
