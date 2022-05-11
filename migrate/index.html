@@ -8,21 +8,21 @@
       
       
       
-        <link rel="canonical" href="https://ekristen.github.io/cast/">
+        <link rel="canonical" href="https://ekristen.github.io/cast/migrate/">
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.14">
     
     
       
-        <title>Cast</title>
+        <title>Migration - Cast</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.3de6f41f.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.3de6f41f.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.cc9b2e1e.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cc9b2e1e.min.css">
         
           
           
@@ -41,7 +41,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -65,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cast" class="md-skip">
+        <a href="#migrating-to-cast" class="md-skip">
           Skip to content
         </a>
       
@@ -79,7 +79,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="Cast" class="md-header__button md-logo" aria-label="Cast" data-md-component="logo">
+    <a href=".." title="Cast" class="md-header__button md-logo" aria-label="Cast" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -98,7 +98,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Migration
             
           </span>
         </div>
@@ -170,12 +170,10 @@
         
   
   
-    
-  
 
 
   <li class="md-tabs__item">
-    <a href="." class="md-tabs__link md-tabs__link--active">
+    <a href=".." class="md-tabs__link">
       Home
     </a>
   </li>
@@ -187,7 +185,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="distro/" class="md-tabs__link">
+    <a href="../distro/" class="md-tabs__link">
       Distro
     </a>
   </li>
@@ -196,10 +194,12 @@
         
   
   
+    
+  
 
 
   <li class="md-tabs__item">
-    <a href="migrate/" class="md-tabs__link">
+    <a href="./" class="md-tabs__link md-tabs__link--active">
       Migration
     </a>
   </li>
@@ -226,7 +226,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="Cast" class="md-nav__button md-logo" aria-label="Cast" data-md-component="logo">
+    <a href=".." title="Cast" class="md-nav__button md-logo" aria-label="Cast" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -255,6 +255,36 @@
 
   
   
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distro/" class="md-nav__link">
+        Distro
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
     
   
   
@@ -267,12 +297,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Home
+          Migration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="." class="md-nav__link md-nav__link--active">
-        Home
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Migration
       </a>
       
         
@@ -291,37 +321,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-cast-distro" class="md-nav__link">
-    What is a Cast Distro?
+  <a href="#design" class="md-nav__link">
+    Design
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    Configuration
-  </a>
-  
-    <nav class="md-nav" aria-label="Configuration">
+    <nav class="md-nav" aria-label="Design">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#for-developers" class="md-nav__link">
-    For Developers
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aliases" class="md-nav__link">
-    Aliases
+  <a href="#development" class="md-nav__link">
+    Development
   </a>
   
 </li>
@@ -332,23 +348,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#developers" class="md-nav__link">
-    Developers
+  <a href="#migrating" class="md-nav__link">
+    Migrating
   </a>
   
-    <nav class="md-nav" aria-label="Developers">
+    <nav class="md-nav" aria-label="Migrating">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#saltstack" class="md-nav__link">
-    Saltstack
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#release" class="md-nav__link">
-    Release
+  <a href="#migration-by-example" class="md-nav__link">
+    Migration by Example
   </a>
   
 </li>
@@ -362,36 +371,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="distro/" class="md-nav__link">
-        Distro
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="migrate/" class="md-nav__link">
-        Migration
-      </a>
     </li>
   
 
@@ -423,37 +402,23 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-cast-distro" class="md-nav__link">
-    What is a Cast Distro?
+  <a href="#design" class="md-nav__link">
+    Design
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    Configuration
-  </a>
-  
-    <nav class="md-nav" aria-label="Configuration">
+    <nav class="md-nav" aria-label="Design">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#for-developers" class="md-nav__link">
-    For Developers
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#aliases" class="md-nav__link">
-    Aliases
+  <a href="#development" class="md-nav__link">
+    Development
   </a>
   
 </li>
@@ -464,23 +429,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#developers" class="md-nav__link">
-    Developers
+  <a href="#migrating" class="md-nav__link">
+    Migrating
   </a>
   
-    <nav class="md-nav" aria-label="Developers">
+    <nav class="md-nav" aria-label="Migrating">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#saltstack" class="md-nav__link">
-    Saltstack
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#release" class="md-nav__link">
-    Release
+  <a href="#migration-by-example" class="md-nav__link">
+    Migration by Example
   </a>
   
 </li>
@@ -504,48 +462,65 @@
                 
 
 
-<h1 id="cast">Cast<a class="headerlink" href="#cast" title="Permanent link">&para;</a></h1>
-<p>Cast is an installer tool for any Cast distro like <a href="https://github.com/teamdfir/sift">SIFT</a> or <a href="https://github.com/remnux/remnux">REMNUX</a>.</p>
-<p><a href="https://asciinema.org/a/463178"><img alt="asciicast" src="https://asciinema.org/a/463178.svg" /></a></p>
-<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>cast install &lt;owner/repo<span class="p">|</span>alias&gt;
+<h1 id="migrating-to-cast">Migrating to Cast<a class="headerlink" href="#migrating-to-cast" title="Permanent link">&para;</a></h1>
+<p>This is a migration guide for existing distros that are using some variation of the <code>sift-cli</code> like SIFT or REMnux.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Cast is a singlular tool designed to install, test and release cast compatible distributions that are built with SaltStack.</p>
+<p>It uses a single file in the project root called <code>.cast.yml</code> to define how releases and installations take place.</p>
+<p>Cast uses <a href="">cosign</a> to sign all releases but supports the legacy PGP signing that the <code>sift-cli</code> and <code>remnux-cli</code> uses.</p>
+<h2 id="design">Design<a class="headerlink" href="#design" title="Permanent link">&para;</a></h2>
+<p>A Cast distro is a bunch of SaltStack states and there's and how they are organized is very flexible but there is a recommended
+base organization. To support embedding states from one project into another project using git submodules, it is recommended
+that all base states start in the root of the project. A base state is generally a target for building like <code>desktop</code> or <code>server</code> or
+<code>dedicated</code> or <code>standalone</code>. All other states are encourage to be in subdirectories that make sense from a human readability and organization
+standpoint.</p>
+<p>This design allows for a distro to be submoduled into another distro.</p>
+<h3 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h3>
+<p>During development of a Cast distro, Cast provides testing tools but if you'd like to use SaltStack directly you simply need to honor a few
+guidelines for how to setup your development environment. For example if you are building a distro called <code>example</code> you'd want your file root
+for saltstack to be <code>/tmp/salt</code> with your Cast distro cloned into <code>/tmp/salt/example</code>. </p>
+<h2 id="migrating">Migrating<a class="headerlink" href="#migrating" title="Permanent link">&para;</a></h2>
+<p>To migrate to Cast and to use Cast to manage all your releases there are a few steps that must be taken.</p>
+<ol>
+<li>Create a Cosign Private and Public Key</li>
+<li>Ensure you have your PGP Private and Public Key</li>
+<li>Create a <code>.cast.yml</code> file and populate it properly.</li>
+<li>Modify .gitignore</li>
+<li>Commit changes</li>
+<li>Create a tag</li>
+<li>Create a release</li>
+</ol>
+<h3 id="migration-by-example">Migration by Example<a class="headerlink" href="#migration-by-example" title="Permanent link">&para;</a></h3>
+<p>The current version of SIFT is not in the recommended format. All base states exist in a subfolder within the root of the project, but Cast is designed
+to handle this scenario if it's required.</p>
+<p>To migrate SIFT as it is currently, the Cast file would look like the following. </p>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift</span><span class="w"></span>
+<span class="nt">base_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift</span><span class="w"></span>
+<span class="nt">modes</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">server</span><span class="w"></span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift.server</span><span class="w"></span>
+<span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
+<span class="nt">supported_os</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu</span><span class="w"></span>
 </code></pre></div>
-<p><strong>Note:</strong> there are only two aliases currently supported, <code>sift</code> and <code>remnux</code> which are resolved to <code>teamdfir/sift-saltstack</code> and <code>remnux/salt-states</code> respectively.</p>
-<h2 id="what-is-a-cast-distro">What is a Cast Distro?<a class="headerlink" href="#what-is-a-cast-distro" title="Permanent link">&para;</a></h2>
-<p>Simply put a cast distro is one published by the cast binary, however it's a bit more complicated than that.</p>
-<p>The underlying technology used for installing the distro is Saltstack.</p>
-<p>There are only two (2) version 1 cast distros out there and they are SIFT and REMnux and what makes them a v1 is the way the release files are generated and signed and how the saltstack files are organized in the repository.</p>
-<p>A version 2 cast distro is one like <a href="">example-distro-saltstack</a> where the salt states start in the root of the project and the release is generated by the <code>cast-devtools</code>. The reason for moving the states to the root is for <code>git submodule</code> usage for distros that extend another distro.</p>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>Cast is configured via the <code>.cast.yml</code> file in the root of the cast distro project. This configuration is required and contains important information like what GitHub Repository should releases be published to, what the manifest file contents should be.</p>
-<p>Part of the configuration is the <code>manifest</code> definition that ultimately gets uploaded as a release asset. The manifest dictates things like <code>base</code>, <code>modes</code>, and <code>supported operating systems</code>.</p>
-<ul>
-<li><code>base</code> - this is the name of the base directory that the files should be extracted into</li>
-<li><code>modes</code> - this is a way to define modes that the user can specify along with the default mode, if none is specified</li>
-<li><code>supported_os</code> - this is a way to define what operating systems are supported</li>
-</ul>
-<h3 id="for-developers">For Developers<a class="headerlink" href="#for-developers" title="Permanent link">&para;</a></h3>
-<p>If your distro is called <code>alpha</code> then your <code>base</code> should be <code>alpha</code>, all salt states will be homed into a directory called <code>alpha</code></p>
-<h3 id="aliases">Aliases<a class="headerlink" href="#aliases" title="Permanent link">&para;</a></h3>
-<p>Cast has the concept of aliases and it's possible to add additional distros to this alias list.</p>
-<p>However the aliases serve a more specific purpose for supporing backwards compatibility for older versions of SIFT and REMnux that were not released as a <strong>cast</strong> distro originally.</p>
-<h2 id="developers">Developers<a class="headerlink" href="#developers" title="Permanent link">&para;</a></h2>
-<p>Developing a distro for cast is very simple, this documentation will walk you through cast initialization.</p>
-<h3 id="saltstack">Saltstack<a class="headerlink" href="#saltstack" title="Permanent link">&para;</a></h3>
-<p>To make embedding a distro easier in another distro both for the community and for SANS builds purposes, the salt states have now been moved to the root of the project. This allows for a repo to be submoduled into another repo and the <code>manifest.yml</code> dictates to the installer how things should be extracted and installed.</p>
-<p>Futhermore the <code>devtools</code> contains commands to help developers test their states in the correct structure format.</p>
-<h3 id="release">Release<a class="headerlink" href="#release" title="Permanent link">&para;</a></h3>
-<p>Requirements</p>
-<ul>
-<li>Tag must be created outside of the tool and pushed to the remote</li>
-<li>Cosign private key and public key must be present in the repo</li>
-</ul>
-<p>Creating a release has never been more simply. However one thing is required, that you tag and push the tag to GitHub prior to running the command.</p>
-<div class="highlight"><pre><span></span><code>git tag v1.0.0 <span class="o">&amp;&amp;</span> git push origin --tags
+<p>Since all the states exist within the <code>sift</code> folder we define the <code>base_dir</code> as sift, this is how we ensure files get packed and unpacked properly for execution.
+The modes are a carry over from the sift-cli and the easy modes that make represent an installation mode for the distro, modes allows for a default to be specified
+and what the modes are and what state should be called as a result, this allows for a great deal of flexibility by a distro author.</p>
+<p>Finally the supported OS provides a way to indicate if the target OS is supported or not.</p>
+<p>Once the <code>.cast.yml</code> is in place and committed to the repository, we can create our first tag and publish using Cast. Since we want to maintain backwards
+compatibility with the <code>sift-cli</code> we'll enable legacy signing using PGP.</p>
+<p>First, update your <code>.gitignore</code> and ignore <code>*.key</code></p>
+<p>Second, create your cosign keys.</p>
+<div class="highlight"><pre><span></span><code>cosign generate-keypair
 </code></pre></div>
-<p>Then you simply run the release command from your local branch.</p>
-<div class="highlight"><pre><span></span><code>cast-devtools release
+<p>Third, copy your PGP keys as <code>pgp.key</code> and <code>pgp.pub</code>.</p>
+<p>Fourth, create a new tag and push it to the remote.</p>
+<p>Finally, run Cast to release. </p>
+<div class="highlight"><pre><span></span><code>cast release --legacy-pgp-sign
 </code></pre></div>
+<p>This will do some basic validation and package the distro for release and upload all the assets to GitHub Releases.</p>
+<p>Congrats!</p>
 
               
             </article>
@@ -558,21 +533,21 @@
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-      
         
-        <a href="distro/" class="md-footer__link md-footer__link--next" aria-label="Next: Distro" rel="next">
+        <a href="../distro/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Distro" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
-                Next
+                Previous
               </span>
               Distro
             </div>
           </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
         </a>
+      
       
     </nav>
   
@@ -596,10 +571,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.sections", "navigation.tabs"], "search": "assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.tabs"], "search": "../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="assets/javascripts/bundle.c2e1ee47.min.js"></script>
+      <script src="../assets/javascripts/bundle.c2e1ee47.min.js"></script>
       
     
   </body>
