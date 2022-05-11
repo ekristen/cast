@@ -28,7 +28,8 @@ Cast is configured via the `.cast.yml` file in the root of the cast distro proje
 
 Part of the configuration is the `manifest` definition that ultimately gets uploaded as a release asset. The manifest dictates things like `base`, `modes`, and `supported operating systems`.
 
-* `base` - this is the name of the base directory that the files should be extracted into
+* `name` - the name of the distro
+* `base` - (optional) this is the name of the base directory where the saltstack files exist in the project root
 * `modes` - this is a way to define modes that the user can specify along with the default mode, if none is specified
 * `supported_os` - this is a way to define what operating systems are supported
 
@@ -50,8 +51,6 @@ Developing a distro for cast is very simple, this documentation will walk you th
 
 To make embedding a distro easier in another distro both for the community and for SANS builds purposes, the salt states have now been moved to the root of the project. This allows for a repo to be submoduled into another repo and the `manifest.yml` dictates to the installer how things should be extracted and installed.
 
-Futhermore the `devtools` contains commands to help developers test their states in the correct structure format.
-
 ### Release
 
 Requirements
@@ -68,5 +67,5 @@ git tag v1.0.0 && git push origin --tags
 Then you simply run the release command from your local branch.
 
 ```bash
-cast-devtools release
+cast release
 ```
