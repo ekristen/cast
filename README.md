@@ -35,7 +35,7 @@ Part of the configuration is the `manifest` definition that ultimately gets uplo
 
 ### For Developers
 
-If your distro is called `alpha` then your `base` should be `alpha`, all salt states will be homed into a directory called `alpha`
+If your distro is called `alpha` then your `name` should be `alpha`, all base saltstack states should be based out of the root of the project, however if all the states have to be in a subdirectory, then the `base_dir` must be set to the name of that subdirectory.
 
 ### Aliases
 
