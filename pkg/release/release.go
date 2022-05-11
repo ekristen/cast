@@ -341,6 +341,10 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 				Name: targzSigFilename,
 				Path: filepath.Join(dir, targzSigFilename),
 			},
+			{
+				Name: "pgp.pub",
+				Path: "pgp.pub",
+			},
 		}
 
 		artifacts = append(artifacts, legacyArtifacts...)
