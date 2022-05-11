@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/urfave/cli/v2"
 
@@ -43,10 +44,15 @@ func Execute(c *cli.Context) error {
 	// docker run -it --rm --name="sift-state-${STATE}" -v `pwd`/sift:/srv/salt/sift --cap-add SYS_ADMIN teamdfir/sift-saltstack-tester:${DISTRO} \
 	//  salt-call -l debug --local --retcode-passthrough --state-output=mixed state.sls ${STATE} pillar="{sift_user: root}"
 
+	basePath := cwd
+	if cfg.Manifest.Base != "" {
+		basePath = filepath.Join(basePath, cfg.Manifest.Base)
+	}
+
 	args := []string{
 		"run", "-i", "--rm",
 		`--name=cast-state`,
-		fmt.Sprintf("--volume=%s:/srv/salt/%s", cwd, cfg.Manifest.Base),
+		fmt.Sprintf("--volume=%s:/srv/salt/%s", basePath, cfg.Manifest.Name),
 		`--cap-add=SYS_ADMIN`,
 		c.String("image"),
 		"salt-call", "-l", "debug", "--local", "--retcode-passthrough",
