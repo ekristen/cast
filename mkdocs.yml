@@ -32,3 +32,4 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Distro: distro.md
+  - Migration: migrate.md
