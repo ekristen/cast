@@ -8,7 +8,7 @@ require (
 	github.com/google/go-github/v41 v41.0.0
 	github.com/otiai10/copy v1.7.0
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/wrangler v0.8.6
+	github.com/rancher/wrangler v0.8.10
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0
