@@ -8,7 +8,7 @@ Cast is a singlular tool designed to install, test and release cast compatible d
 
 It uses a single file in the project root called `.cast.yml` to define how releases and installations take place.
 
-Cast uses [cosign]() to sign all releases but supports the legacy PGP signing that the `sift-cli` and `remnux-cli` uses.
+Cast uses [cosign](https://github.com/sigstore/cosign) to sign all releases but supports the legacy PGP signing that the `sift-cli` and `remnux-cli` uses.
 
 ## Design
 
@@ -24,7 +24,7 @@ This design allows for a distro to be submoduled into another distro.
 
 During development of a Cast distro, Cast provides testing tools but if you'd like to use SaltStack directly you simply need to honor a few
 guidelines for how to setup your development environment. For example if you are building a distro called `example` you'd want your file root
-for saltstack to be `/tmp/salt` with your Cast distro cloned into `/tmp/salt/example`. 
+for saltstack to be `/tmp/salt` with your Cast distro cloned into `/tmp/salt/example`.
 
 ## Migrating
 
@@ -43,7 +43,7 @@ To migrate to Cast and to use Cast to manage all your releases there are a few s
 The current version of SIFT is not in the recommended format. All base states exist in a subfolder within the root of the project, but Cast is designed
 to handle this scenario if it's required.
 
-To migrate SIFT as it is currently, the Cast file would look like the following. 
+To migrate SIFT as it is currently, the Cast file would look like the following.
 
 ```yaml
 version: 2
@@ -54,7 +54,9 @@ modes:
     state: sift.server
     default: true
 supported_os:
-  - name: ubuntu
+  - id: ubuntu
+    release: 20.04
+    codename: focal
 ```
 
 Since all the states exist within the `sift` folder we define the `base_dir` as sift, this is how we ensure files get packed and unpacked properly for execution.
@@ -71,14 +73,18 @@ First, update your `.gitignore` and ignore `*.key`
 Second, create your cosign keys.
 
 ```bash
-cosign generate-keypair
+cosign generate-key-pair
 ```
+
+**Note:** whether you set a password or not, you'll need to set the environment variable `COSIGN_PASSWORD` with the value so that cast can use the key.
 
 Third, copy your PGP keys as `pgp.key` and `pgp.pub`.
 
+**Note:** if your PGP key is encryped you'll need to set `PGP_PASSWORD` as an environment viarable so that cast can use the key to sign.
+
 Fourth, create a new tag and push it to the remote.
 
-Finally, run Cast to release. 
+Finally, run Cast to release.
 
 ```bash
 cast release --legacy-pgp-sign
@@ -87,4 +93,3 @@ cast release --legacy-pgp-sign
 This will do some basic validation and package the distro for release and upload all the assets to GitHub Releases.
 
 Congrats!
-
