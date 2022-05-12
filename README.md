@@ -12,6 +12,10 @@ cast install <owner/repo|alias>
 
 **Note:** there are only two aliases currently supported, `sift` and `remnux` which are resolved to `teamdfir/sift-saltstack` and `remnux/salt-states` respectively.
 
+## Dependencies
+
+* [cosign](https://github.com/sigstore/cosign) - required for release and verification
+
 ## What is a Cast Distro?
 
 Simply put a cast distro is one published by the cast binary, however it's a bit more complicated than that.
