@@ -467,7 +467,7 @@
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>Cast is a singlular tool designed to install, test and release cast compatible distributions that are built with SaltStack.</p>
 <p>It uses a single file in the project root called <code>.cast.yml</code> to define how releases and installations take place.</p>
-<p>Cast uses <a href="">cosign</a> to sign all releases but supports the legacy PGP signing that the <code>sift-cli</code> and <code>remnux-cli</code> uses.</p>
+<p>Cast uses <a href="https://github.com/sigstore/cosign">cosign</a> to sign all releases but supports the legacy PGP signing that the <code>sift-cli</code> and <code>remnux-cli</code> uses.</p>
 <h2 id="design">Design<a class="headerlink" href="#design" title="Permanent link">&para;</a></h2>
 <p>A Cast distro is a bunch of SaltStack states and there's and how they are organized is very flexible but there is a recommended
 base organization. To support embedding states from one project into another project using git submodules, it is recommended
@@ -478,7 +478,7 @@ standpoint.</p>
 <h3 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h3>
 <p>During development of a Cast distro, Cast provides testing tools but if you'd like to use SaltStack directly you simply need to honor a few
 guidelines for how to setup your development environment. For example if you are building a distro called <code>example</code> you'd want your file root
-for saltstack to be <code>/tmp/salt</code> with your Cast distro cloned into <code>/tmp/salt/example</code>. </p>
+for saltstack to be <code>/tmp/salt</code> with your Cast distro cloned into <code>/tmp/salt/example</code>.</p>
 <h2 id="migrating">Migrating<a class="headerlink" href="#migrating" title="Permanent link">&para;</a></h2>
 <p>To migrate to Cast and to use Cast to manage all your releases there are a few steps that must be taken.</p>
 <ol>
@@ -493,7 +493,7 @@ for saltstack to be <code>/tmp/salt</code> with your Cast distro cloned into <co
 <h3 id="migration-by-example">Migration by Example<a class="headerlink" href="#migration-by-example" title="Permanent link">&para;</a></h3>
 <p>The current version of SIFT is not in the recommended format. All base states exist in a subfolder within the root of the project, but Cast is designed
 to handle this scenario if it's required.</p>
-<p>To migrate SIFT as it is currently, the Cast file would look like the following. </p>
+<p>To migrate SIFT as it is currently, the Cast file would look like the following.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift</span><span class="w"></span>
 <span class="nt">base_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift</span><span class="w"></span>
@@ -502,7 +502,9 @@ to handle this scenario if it's required.</p>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sift.server</span><span class="w"></span>
 <span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
 <span class="nt">supported_os</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu</span><span class="w"></span>
+<span class="w">    </span><span class="nt">release</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20.04</span><span class="w"></span>
+<span class="w">    </span><span class="nt">codename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">focal</span><span class="w"></span>
 </code></pre></div>
 <p>Since all the states exist within the <code>sift</code> folder we define the <code>base_dir</code> as sift, this is how we ensure files get packed and unpacked properly for execution.
 The modes are a carry over from the sift-cli and the easy modes that make represent an installation mode for the distro, modes allows for a default to be specified
@@ -512,11 +514,13 @@ and what the modes are and what state should be called as a result, this allows 
 compatibility with the <code>sift-cli</code> we'll enable legacy signing using PGP.</p>
 <p>First, update your <code>.gitignore</code> and ignore <code>*.key</code></p>
 <p>Second, create your cosign keys.</p>
-<div class="highlight"><pre><span></span><code>cosign generate-keypair
+<div class="highlight"><pre><span></span><code>cosign generate-key-pair
 </code></pre></div>
+<p><strong>Note:</strong> whether you set a password or not, you'll need to set the environment variable <code>COSIGN_PASSWORD</code> with the value so that cast can use the key.</p>
 <p>Third, copy your PGP keys as <code>pgp.key</code> and <code>pgp.pub</code>.</p>
+<p><strong>Note:</strong> if your PGP key is encryped you'll need to set <code>PGP_PASSWORD</code> as an environment viarable so that cast can use the key to sign.</p>
 <p>Fourth, create a new tag and push it to the remote.</p>
-<p>Finally, run Cast to release. </p>
+<p>Finally, run Cast to release.</p>
 <div class="highlight"><pre><span></span><code>cast release --legacy-pgp-sign
 </code></pre></div>
 <p>This will do some basic validation and package the distro for release and upload all the assets to GitHub Releases.</p>
