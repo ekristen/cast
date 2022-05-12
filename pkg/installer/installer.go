@@ -238,13 +238,6 @@ func (i *Installer) runSaltstack() error {
 		for scanner.Scan() {
 			m := strings.TrimPrefix(scanner.Text(), "# ")
 
-			/*
-				_, err := logFile.WriteString(fmt.Sprintf("%s\n", m))
-				if err != nil {
-					i.log.WithError(err).Warn("unable to write to log file")
-				}
-			*/
-
 			log := i.log.WithField("component", "saltstack")
 
 			if !inStateExecution {
@@ -334,6 +327,10 @@ func (i *Installer) runSaltstack() error {
 	cmd.Wait()
 
 	// TODO: write out to a file
+
+	if _, err := logFile.Write(out.Bytes()); err != nil {
+		i.log.WithError(err).Error("unable to write to log file")
+	}
 
 	i.log.WithField("log", i.logFile).Info("log file location")
 
