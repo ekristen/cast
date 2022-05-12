@@ -5,6 +5,18 @@ release:
     name: cast
   extra_files:
     - glob: "./*.pub"
+  footer: |
+    ## Release Verification
+
+    You can verify a release of cast by using cosign and it's verify-blob command and simply point to the hosted files.
+    If you'd rather download them you can do that as well and run the same command to verify.
+
+    ```bash
+    cosign verify-blob \
+      --key https://github.com/ekristen/cast/releases/download/v{{.Version}}/cosign.pub \
+      --signature https://github.com/ekristen/cast/releases/download/v{{.Version}}/cast_v{{.Version}}_linux_amd64.tar.gz.sig \
+      https://github.com/ekristen/cast/releases/download/v{{.Version}}/cast_v{{.Version}}_linux_amd64.tar.gz
+    ```
 env:
   - CGO_ENABLED=0
 builds:
