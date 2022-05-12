@@ -9,6 +9,7 @@ import (
 
 	"github.com/ekristen/cast/pkg/common"
 
+	_ "github.com/ekristen/cast/pkg/commands/init"
 	_ "github.com/ekristen/cast/pkg/commands/install"
 	_ "github.com/ekristen/cast/pkg/commands/release"
 	_ "github.com/ekristen/cast/pkg/commands/test"
