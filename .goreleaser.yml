@@ -11,7 +11,7 @@ builds:
   - id: cast
     goos:
       - linux
-      # - darwin
+      - darwin
     goarch:
       - amd64
     ldflags:

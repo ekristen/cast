@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -41,6 +42,7 @@ type Installer struct {
 	configRoot string
 	logRoot    string
 	logFile    string
+	outFile    string
 
 	command string
 
@@ -134,6 +136,7 @@ func (i *Installer) setup() error {
 		return err
 	}
 	i.logFile = filepath.Join(i.logRoot, "saltstack.log")
+	i.outFile = filepath.Join(i.logRoot, "results.yaml")
 
 	i.configRoot = filepath.Join(i.config.CachePath, "salt")
 	if err := os.MkdirAll(i.configRoot, 0755); err != nil {
@@ -331,8 +334,12 @@ func (i *Installer) runSaltstack() error {
 	if _, err := logFile.Write(out.Bytes()); err != nil {
 		i.log.WithError(err).Error("unable to write to log file")
 	}
+	if err := ioutil.WriteFile(i.outFile, out.Bytes(), 0640); err != nil {
+		i.log.WithError(err).Error("unable to write to out file")
+	}
 
-	i.log.WithField("log", i.logFile).Info("log file location")
+	i.log.WithField("file", i.logFile).Info("log file location")
+	i.log.WithField("file", i.outFile).Info("results file location")
 
 	switch code := cmd.ProcessState.ExitCode(); {
 	// This is hit when salt-call encounters an error

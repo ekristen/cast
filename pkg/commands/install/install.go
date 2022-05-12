@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/ekristen/cast/pkg/cache"
@@ -17,6 +18,10 @@ import (
 )
 
 func Execute(c *cli.Context) error {
+	if runtime.GOOS != "linux" {
+		return fmt.Errorf("install does not support this operating system (%s) at this time", runtime.GOOS)
+	}
+
 	ctx := signals.SetupSignalHandler(c.Context)
 
 	log := logrus.WithField("command", "install")
