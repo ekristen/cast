@@ -5,8 +5,8 @@ const (
 	HashURL   string = "https://repo.saltproject.io/salt-singlebin/3004-1/salt-3004-1_SHA512"
 	SigURL    string = "https://repo.saltproject.io/salt-singlebin/3004-1/salt-3004-1_SHA512.asc"
 
-	UbuntuRepo string = "deb [arch=%s] https://repo.saltproject.io/py3/ubuntu/%s/%s/3004 %s main"
-	DebianRepo string = "deb [arch=%s] https://repo.saltproject.io/py3/debian/%s/%s/3004 %s main"
+	UbuntuRepo string = "deb [arch=%s] https://repo.saltproject.io/py3/ubuntu/%s/%s/3004.1 %s main"
+	DebianRepo string = "deb [arch=%s] https://repo.saltproject.io/py3/debian/%s/%s/3004.1 %s main"
 )
 
 const PublicKey string = `-----BEGIN PGP PUBLIC KEY BLOCK-----
