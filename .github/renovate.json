@@ -1,5 +1,16 @@
 {
     "extends": [
         "config:base"
+    ],
+    "regexManagers": [
+        {
+            "fileMatch": [
+                ".*.go$"
+            ],
+            "matchStrings": [
+                "\"(?<currentValue>.*)\" \/\/ renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s"
+            ],
+            "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+        }
     ]
 }

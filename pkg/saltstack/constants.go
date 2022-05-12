@@ -1,12 +1,13 @@
 package saltstack
 
 const (
-	BinaryURL string = "https://repo.saltproject.io/salt-singlebin/3004-1/salt-3004-1-linux-amd64.tar.gz"
-	HashURL   string = "https://repo.saltproject.io/salt-singlebin/3004-1/salt-3004-1_SHA512"
-	SigURL    string = "https://repo.saltproject.io/salt-singlebin/3004-1/salt-3004-1_SHA512.asc"
+	Version string = "3004.1" // renovate: datasource=github-releases depName=saltstack/salt
 
-	UbuntuRepo string = "deb [arch=%s] https://repo.saltproject.io/py3/ubuntu/%s/%s/3004.1 %s main"
-	DebianRepo string = "deb [arch=%s] https://repo.saltproject.io/py3/debian/%s/%s/3004.1 %s main"
+	BinaryURL  string = `https://repo.saltproject.io/salt-singlebin/{{ .Version | replace "." "-" }}/salt-{{ .Version | replace "." "-" }}-linux-{{ .OS.Architecture }}.tar.gz`
+	HashURL    string = `https://repo.saltproject.io/salt-singlebin/{{ .Version | replace "." "-" }}/salt-{{ .Version | replace "." "-" }}_SHA512`
+	SigURL     string = `https://repo.saltproject.io/salt-singlebin/{{ .Version | replace "." "-" }}/salt-{{ .Version | replace "." "-" }}_SHA512.asc`
+	RepoKeyURL string = "https://repo.saltproject.io/py3/{{ .OS.Vendor }}/{{ .OS.Release }}/{{ .OS.Architecture }}/archive/{{ .Version }}/salt-archive-keyring.gpg"
+	APTRepo    string = "deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch={{ .OS.Architecture }}] https://repo.saltproject.io/py3/{{ .OS.Vendor }}/{{ .OS.Release }}/{{ .OS.Architecture }}/archive/{{ .Version }} {{ .OS.Codename }} main"
 )
 
 const PublicKey string = `-----BEGIN PGP PUBLIC KEY BLOCK-----

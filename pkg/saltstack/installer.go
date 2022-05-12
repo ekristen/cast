@@ -7,6 +7,7 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"os"
@@ -29,6 +30,25 @@ const (
 	Package Mode = iota
 	Binary
 )
+
+type Meta struct {
+	Version string
+	OS      *sysinfo.OS
+}
+
+func (m *Meta) Render(val string) (string, error) {
+	tmpl, err := template.New("template").Parse(val)
+	if err != nil {
+		return "", err
+	}
+
+	var content bytes.Buffer
+	if err := tmpl.Execute(&content, m); err != nil {
+		return "", err
+	}
+
+	return content.String(), nil
+}
 
 type Config struct {
 	Path string
@@ -76,17 +96,22 @@ func (i *Installer) GetMode() Mode {
 func (i *Installer) Run(ctx context.Context) error {
 	os.MkdirAll(i.Config.Path, 0755)
 
+	metadata := Meta{
+		Version: Version,
+		OS:      sysinfo.GetOSInfo(),
+	}
+
 	switch i.Mode {
 	case Binary:
-		return i.installBinary(ctx)
+		return i.installBinary(ctx, metadata)
 	case Package:
-		return i.installPackage(ctx)
+		return i.installPackage(ctx, metadata)
 	default:
 		return fmt.Errorf("unsupported install mode")
 	}
 }
 
-func (i *Installer) installBinary(ctx context.Context) error {
+func (i *Installer) installBinary(ctx context.Context, metadata Meta) error {
 	log := i.log.WithField("handler", "install-binary")
 
 	tarfile := filepath.Join(i.Config.Path, "saltstack-binary.tar.gz")
@@ -94,17 +119,32 @@ func (i *Installer) installBinary(ctx context.Context) error {
 	sigfile := filepath.Join(i.Config.Path, "saltstack-binary.tar.gz.sha512.asc")
 
 	log.Info("downloading tar.gz file")
-	if err := utils.DownloadFile(ctx, BinaryURL, tarfile, nil, nil); err != nil {
+	binaryURL, err := metadata.Render(BinaryURL)
+	if err != nil {
+		return err
+	}
+	log.Debugf("binary url: %s", binaryURL)
+	if err := utils.DownloadFile(ctx, binaryURL, tarfile, nil, nil); err != nil {
 		return err
 	}
 
 	log.Info("downloading sha512 file")
-	if err := utils.DownloadFile(ctx, HashURL, hashfile, nil, nil); err != nil {
+	hashURL, err := metadata.Render(HashURL)
+	if err != nil {
+		return err
+	}
+	log.Debugf("hash url: %s", hashURL)
+	if err := utils.DownloadFile(ctx, hashURL, hashfile, nil, nil); err != nil {
 		return err
 	}
 
 	log.Info("downloading signature file")
-	if err := utils.DownloadFile(ctx, SigURL, sigfile, nil, nil); err != nil {
+	sigURL, err := metadata.Render(SigURL)
+	if err != nil {
+		return err
+	}
+	log.Debugf("sig url: %s", sigURL)
+	if err := utils.DownloadFile(ctx, sigURL, sigfile, nil, nil); err != nil {
 		return err
 	}
 
@@ -128,10 +168,8 @@ func (i *Installer) installBinary(ctx context.Context) error {
 	return nil
 }
 
-func (i *Installer) installPackage(ctx context.Context) error {
-	osinfo := sysinfo.GetOSInfo()
-
-	switch osinfo.Vendor {
+func (i *Installer) installPackage(ctx context.Context, metadata Meta) error {
+	switch metadata.OS.Vendor {
 	case "ubuntu":
 		i.log.Debug("checking salt install on ubuntu")
 
@@ -157,8 +195,14 @@ func (i *Installer) installPackage(ctx context.Context) error {
 		}
 
 		if !exists {
-			aptlist := fmt.Sprintf(UbuntuRepo, osinfo.Architecture, osinfo.Version, osinfo.Architecture, osinfo.Codename)
-			if err := ioutil.WriteFile("/etc/apt/sources.list.d/salt.list", []byte(aptlist), 0644); err != nil {
+			aptRepo, err := metadata.Render(APTRepo)
+			if err != nil {
+				return err
+			}
+
+			i.log.Debugf("apt repo: %s", aptRepo)
+
+			if err := ioutil.WriteFile("/etc/apt/sources.list.d/salt.list", []byte(aptRepo), 0644); err != nil {
 				return err
 			}
 			runAptGetInstall = true
@@ -189,7 +233,7 @@ func (i *Installer) installPackage(ctx context.Context) error {
 
 		i.log.Info("salt installed properly")
 	default:
-		return fmt.Errorf("unsupported operating system: %s", osinfo.Vendor)
+		return fmt.Errorf("unsupported operating system: %s", metadata.OS.Vendor)
 	}
 
 	return nil
