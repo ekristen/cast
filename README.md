@@ -43,9 +43,7 @@ If your distro is called `alpha` then your `name` should be `alpha`, all base sa
 
 ### Aliases
 
-Cast has the concept of aliases and it's possible to add additional distros to this alias list.
-
-However the aliases serve a more specific purpose for supporing backwards compatibility for older versions of SIFT and REMnux that were not released as a **cast** distro originally.
+Aliases are only for SIFT and REMnux and not intended for long term use. The aliases serve a more specific purpose for supporing backwards compatibility for older versions of SIFT and REMnux that were not released as a **cast** distro originally.
 
 ## Developers
 
