@@ -40,6 +40,7 @@ nfpms:
     builds:
       - cast
     vendor: ekristen.dev
+    file_name_template: "{{ .PackageName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}"
     homepage: https://github.com/ekristen/cast
     maintainer: Erik Kristensen <erik@erikkristensen.com>
     description: Cast is an installer tool for any Cast compatible distro
