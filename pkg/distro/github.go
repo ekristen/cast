@@ -54,6 +54,8 @@ type GitHubDistro struct {
 	Repo    string
 	Version string
 	Name    string
+	Dir     string
+	SaltDir string
 
 	Alias   string
 	IsAlias bool
@@ -130,6 +132,11 @@ func NewGitHub(ctx context.Context, distro string, version *string, includePreRe
 
 	if err := d.verifyRelease(); err != nil {
 		return nil, err
+	}
+
+	d.SaltDir = filepath.Join("source", d.Manifest.Name)
+	if d.Manifest.Base != "" {
+		d.SaltDir = filepath.Join(d.SaltDir, d.Manifest.Base)
 	}
 
 	return d, nil
@@ -326,6 +333,12 @@ func (d *GitHubDistro) extractArchiveFile(dir string) error {
 		strippedName := strings.Split(header.Name, "/")[1:]
 		if len(strippedName) == 0 {
 			continue
+		}
+
+		if d.Manifest.Base != "" {
+			if strings.HasPrefix(strippedName[0], d.Manifest.Base) {
+				strippedName = strippedName[1:]
+			}
 		}
 
 		/*

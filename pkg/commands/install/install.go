@@ -86,6 +86,8 @@ func Execute(c *cli.Context) error {
 		return err
 	}
 
+	log.WithField("path", distroCache.GetPath()).Debug("distro cache path")
+
 	if err := dist.Download(distroCache.GetPath()); err != nil {
 		return err
 	}
@@ -111,7 +113,7 @@ func Execute(c *cli.Context) error {
 
 	fileRoot := c.Path("saltstack-file-root")
 	if fileRoot == "" {
-		fileRoot = filepath.Join(distroCache.GetPath(), dist.GetCacheSaltStackSourcePath())
+		fileRoot = filepath.Join(distroCache.GetPath(), "source")
 	}
 
 	config := &installer.Config{

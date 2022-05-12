@@ -65,11 +65,10 @@ func NewLocal(ctx context.Context, distro string, version *string, includePreRel
 		return nil, err
 	}
 
-	d.SaltDir = filepath.Join("source", d.Manifest.Name)
+	d.SaltDir = distroPath
 	if d.Manifest.Base != "" {
 		d.SaltDir = filepath.Join(d.SaltDir, d.Manifest.Base)
 	}
-	fmt.Println(d.SaltDir)
 
 	return d, nil
 }
@@ -107,12 +106,12 @@ func (d *LocalDistro) GetCachePath() string {
 
 func (d *LocalDistro) GetCacheSaltStackSourcePath() string {
 	fileRootPath := filepath.Join("source", d.Manifest.Name)
-	d.log.Debugf("salstack file root path: %s", fileRootPath)
+	d.log.Debugf("saltstack file root path: %s", fileRootPath)
 	return fileRootPath
 }
 
 func (d *LocalDistro) Download(dir string) error {
-	saltstackFileRootPath := d.GetCacheSaltStackSourcePath()
+	saltstackFileRootPath := filepath.Join(dir, d.GetCacheSaltStackSourcePath())
 	if err := os.MkdirAll(saltstackFileRootPath, 0755); err != nil {
 		return err
 	}
