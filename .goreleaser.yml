@@ -26,6 +26,10 @@ builds:
       - darwin
     goarch:
       - amd64
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: arm64
     ldflags:
       - -s
       - -X '{{ .ModulePath }}/pkg/common.SUMMARY=v{{ .Version }}'
