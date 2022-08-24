@@ -10,7 +10,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/wrangler v0.8.6
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.8.0
 	github.com/urfave/cli/v2 v2.11.2
 	golang.org/x/crypto v0.0.0-20220824171710-5757bc0c5503
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
