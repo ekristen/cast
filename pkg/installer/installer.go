@@ -354,16 +354,21 @@ func (i *Installer) runSaltstack() error {
 
 		i.log.Warn(out.String())
 
+		return fmt.Errorf(out.String())
 	// This is hit when we kill salt-call because of a signals
 	// handler trap on the main cli process
 	case code == -1:
 		i.log.Warn("salt-call terminated")
+
+		return fmt.Errorf("salt-call terminated")
 	case code == 2:
 		if err := i.parseAndLogResults(out.Bytes()); err != nil {
 			return err
 		}
 
 		i.log.Info("salt-call completed but had failed states")
+
+		return fmt.Errorf("salt-call completed but had failed states")
 	case code == 0:
 		if err := i.parseAndLogResults(out.Bytes()); err != nil {
 			return err
