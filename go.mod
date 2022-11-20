@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/ProtonMail/gopenpgp/v2 v2.4.10
 	github.com/google/go-github/v41 v41.0.0
-	github.com/otiai10/copy v1.7.0
+	github.com/otiai10/copy v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/wrangler v0.8.6
 	github.com/sirupsen/logrus v1.9.0
