@@ -2,6 +2,7 @@ package install
 
 import (
 	"fmt"
+	"github.com/ekristen/cast/pkg/saltstack"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -116,16 +117,22 @@ func Execute(c *cli.Context) error {
 		fileRoot = filepath.Join(distroCache.GetPath(), "source")
 	}
 
+	ssim := saltstack.Package
+	if c.String("saltstack-install-mode") == "binary" {
+		ssim = saltstack.Binary
+	}
+
 	config := &installer.Config{
-		Mode:              installer.LocalInstallMode,
-		CachePath:         installerCache.GetPath(),
-		NoRootCheck:       c.Bool("no-root-check"),
-		SaltStackUser:     c.String("user"),
-		SaltStackState:    state,
-		SaltStackTest:     c.Bool("saltstack-test"),
-		SaltStackFileRoot: fileRoot,
-		SaltStackLogLevel: c.String("saltstack-log-level"),
-		SaltStackPillars:  dist.GetSaltstackPillars(),
+		Mode:                 installer.LocalInstallMode,
+		CachePath:            installerCache.GetPath(),
+		NoRootCheck:          c.Bool("no-root-check"),
+		SaltStackUser:        c.String("user"),
+		SaltStackState:       state,
+		SaltStackTest:        c.Bool("saltstack-test"),
+		SaltStackFileRoot:    fileRoot,
+		SaltStackLogLevel:    c.String("saltstack-log-level"),
+		SaltStackPillars:     dist.GetSaltstackPillars(),
+		SaltStackInstallMode: ssim,
 	}
 
 	instance := installer.New(ctx, config)
@@ -212,6 +219,13 @@ func init() {
 			Usage:  "Log level for Saltstack",
 			Value:  "info",
 			Hidden: true,
+		},
+		&cli.StringFlag{
+			Name:    "saltstack-install-mode",
+			Usage:   "Install Mode for Saltstack",
+			Value:   "package",
+			Hidden:  true,
+			Aliases: []string{"ssim"},
 		},
 	}
 

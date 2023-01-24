@@ -95,7 +95,7 @@ func (i *Installer) Run() (err error) {
 
 	i.log.Info("running saltstack installer")
 	sinstaller := saltstack.New(sconfig)
-	sinstaller.SetMode(saltstack.Package)
+	sinstaller.SetMode(saltstack.Binary)
 
 	if err := sinstaller.Run(i.ctx); err != nil {
 		return err

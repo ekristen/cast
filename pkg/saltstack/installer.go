@@ -32,8 +32,10 @@ const (
 )
 
 type Meta struct {
-	Version string
-	OS      *sysinfo.OS
+	MajorVersion string
+	MinorVersion string
+	Version      string
+	OS           *sysinfo.OS
 }
 
 func (m *Meta) Render(val string) (string, error) {
@@ -97,8 +99,10 @@ func (i *Installer) Run(ctx context.Context) error {
 	os.MkdirAll(i.Config.Path, 0755)
 
 	metadata := Meta{
-		Version: Version,
-		OS:      sysinfo.GetOSInfo(),
+		Version:      Version,
+		MajorVersion: strings.Split(Version, ".")[0],
+		MinorVersion: strings.Split(Version, ".")[1],
+		OS:           sysinfo.GetOSInfo(),
 	}
 
 	switch i.Mode {
