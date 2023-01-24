@@ -403,6 +403,14 @@ func (i *Installer) parseAndLogResults(in []byte) error {
 		}
 	}
 
+	if i.config.SaltStackTest {
+		i.log.WithFields(logrus.Fields{
+			"installed":  success,
+			"to_install": failed,
+		}).Info("saltstack test run complete")
+		return nil
+	}
+
 	if failed > 0 {
 		space := regexp.MustCompile(`\s+`)
 		i.log.WithFields(logrus.Fields{
