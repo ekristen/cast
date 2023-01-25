@@ -74,14 +74,14 @@ type GitHubDistro struct {
 
 	archiveName string
 
-	data interface{}
+	data Data
 }
 
 type LocalConfig struct {
 	Manifest *Manifest `yaml:"manifest"`
 }
 
-func NewGitHub(ctx context.Context, distro string, version *string, includePreReleases bool, githubToken string, data interface{}) (Distro, error) {
+func NewGitHub(ctx context.Context, distro string, version *string, includePreReleases bool, githubToken string, data Data) (Distro, error) {
 	var d *GitHubDistro
 	if v, ok := aliases[distro]; ok {
 		d = v
@@ -101,6 +101,7 @@ func NewGitHub(ctx context.Context, distro string, version *string, includePreRe
 
 	if version != nil {
 		d.Version = *version
+		data.Version = d.Version
 	}
 
 	d.Name = fmt.Sprintf("%s_%s", d.Owner, d.Repo)
