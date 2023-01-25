@@ -17,6 +17,7 @@ release:
       --signature https://github.com/ekristen/cast/releases/download/v{{.Version}}/cast_v{{.Version}}_linux_amd64.tar.gz.sig \
       https://github.com/ekristen/cast/releases/download/v{{.Version}}/cast_v{{.Version}}_linux_amd64.tar.gz
     ```
+  prerelease: auto
 env:
   - CGO_ENABLED=0
 builds:

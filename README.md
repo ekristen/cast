@@ -1,6 +1,8 @@
 # Cast (Status: Beta)
 
-Cast is an installer tool for any Cast distro like [SIFT](https://github.com/teamdfir/sift) or [REMNUX](https://github.com/remnux/remnux).
+Cast is an installer tool for any Cast compatible distribution like [SIFT](https://github.com/teamdfir/sift) or [REMNUX](https://github.com/remnux/remnux).
+
+The goal of Cast is to deliver a simple command line utility to install custom distributions that are build with [saltstack](https://saltproject.io).
 
 [![asciicast](https://asciinema.org/a/463178.svg)](https://asciinema.org/a/463178)
 
@@ -57,10 +59,10 @@ To make embedding a distro easier in another distro both for the community and f
 
 Requirements
 
-* Tag must be created outside of the tool and pushed to the remote
+* Tag must be created outside the tool and pushed to the remote
 * Cosign private key and public key must be present in the repo
 
-Creating a release has never been more simply. However one thing is required, that you tag and push the tag to GitHub prior to running the command.
+Creating a release has never been more simply. However, one thing is required, that you tag and push the tag to GitHub prior to running the command.
 
 ```bash
 git tag v1.0.0 && git push origin --tags

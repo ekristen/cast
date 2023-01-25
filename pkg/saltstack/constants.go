@@ -1,13 +1,13 @@
 package saltstack
 
 const (
-	Version string = "3004.1" // renovate: datasource=github-releases depName=saltstack/salt
+	Version string = "3005.1" // renovate: datasource=github-releases depName=saltstack/salt
 
-	BinaryURL  string = `https://repo.saltproject.io/salt-singlebin/{{ .Version | replace "." "-" }}/salt-{{ .Version | replace "." "-" }}-linux-{{ .OS.Architecture }}.tar.gz`
-	HashURL    string = `https://repo.saltproject.io/salt-singlebin/{{ .Version | replace "." "-" }}/salt-{{ .Version | replace "." "-" }}_SHA512`
-	SigURL     string = `https://repo.saltproject.io/salt-singlebin/{{ .Version | replace "." "-" }}/salt-{{ .Version | replace "." "-" }}_SHA512.asc`
-	RepoKeyURL string = "https://repo.saltproject.io/py3/{{ .OS.Vendor }}/{{ .OS.Release }}/{{ .OS.Architecture }}/archive/{{ .Version }}/salt-archive-keyring.gpg"
-	APTRepo    string = "deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch={{ .OS.Architecture }}] https://repo.saltproject.io/py3/{{ .OS.Vendor }}/{{ .OS.Release }}/{{ .OS.Architecture }}/archive/{{ .Version }} {{ .OS.Codename }} main"
+	BinaryURL  string = `https://repo.saltproject.io/salt/singlebin/{{ .Version }}-1/salt-{{ .Version }}-1-linux-{{ .OS.Architecture }}.tar.gz`
+	HashURL    string = `https://repo.saltproject.io/salt/singlebin/{{ .Version }}-1/salt-{{ .Version }}-1_SHA512`
+	SigURL     string = `https://repo.saltproject.io/salt/singlebin/{{ .Version }}-1/salt-{{ .Version }}-1_SHA512.asc`
+	RepoKeyURL string = "https://repo.saltproject.io/salt/py3/{{ .OS.Vendor }}/{{ .OS.Release }}/{{ .OS.Architecture }}/{{ .MajorVersion }}/salt-archive-keyring.gpg"
+	APTRepo    string = "deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch={{ .OS.Architecture }}] https://repo.saltproject.io/salt/py3/{{ .OS.Vendor }}/{{ .OS.Release }}/{{ .OS.Architecture }}/{{ .MajorVersion }} {{ .OS.Codename }} main"
 )
 
 const PublicKey string = `-----BEGIN PGP PUBLIC KEY BLOCK-----

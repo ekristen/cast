@@ -2,6 +2,7 @@ package install
 
 import (
 	"fmt"
+	"github.com/ekristen/cast/pkg/saltstack"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -58,9 +59,7 @@ func Execute(c *cli.Context) error {
 		distroVersion = distroParts[1]
 	}
 
-	distroData := struct {
-		User string
-	}{
+	distroData := distro.Data{
 		User: c.String("user"),
 	}
 
@@ -116,16 +115,22 @@ func Execute(c *cli.Context) error {
 		fileRoot = filepath.Join(distroCache.GetPath(), "source")
 	}
 
+	ssim := saltstack.Package
+	if c.String("saltstack-install-mode") == "binary" {
+		ssim = saltstack.Binary
+	}
+
 	config := &installer.Config{
-		Mode:              installer.LocalInstallMode,
-		CachePath:         installerCache.GetPath(),
-		NoRootCheck:       c.Bool("no-root-check"),
-		SaltStackUser:     c.String("user"),
-		SaltStackState:    state,
-		SaltStackTest:     c.Bool("saltstack-test"),
-		SaltStackFileRoot: fileRoot,
-		SaltStackLogLevel: c.String("saltstack-log-level"),
-		SaltStackPillars:  dist.GetSaltstackPillars(),
+		Mode:                 installer.LocalInstallMode,
+		CachePath:            installerCache.GetPath(),
+		NoRootCheck:          c.Bool("no-root-check"),
+		SaltStackUser:        c.String("user"),
+		SaltStackState:       state,
+		SaltStackTest:        c.Bool("saltstack-test"),
+		SaltStackFileRoot:    fileRoot,
+		SaltStackLogLevel:    c.String("saltstack-log-level"),
+		SaltStackPillars:     dist.GetSaltstackPillars(),
+		SaltStackInstallMode: ssim,
 	}
 
 	instance := installer.New(ctx, config)
@@ -142,76 +147,83 @@ func init() {
 		&cli.StringFlag{
 			Name:    "github-token",
 			Usage:   "Used to authenticate to the GitHub API",
-			EnvVars: []string{"GITHUB_TOKEN"},
+			EnvVars: []string{"GITHUB_TOKEN", "CAST_GITHUB_TOKEN"},
 		},
-		/*
-			&cli.StringFlag{
-				Name:  "ssh-host",
-				Usage: "Remote SSH Host",
-			},
-			&cli.IntFlag{
-				Name:  "ssh-port",
-				Usage: "Port of the Remote SSH Host",
-				Value: 22,
-			},
-		*/
 		&cli.BoolFlag{
 			Name:  "pre-release",
 			Usage: "Include pre-release versions as valid install targets",
 		},
 		&cli.StringFlag{
-			Name:  "mode",
-			Usage: "If the distro supports a mode, you can specify it for install",
-			Value: "default",
+			Name:    "mode",
+			Usage:   "If the distro supports a mode, you can specify it for install",
+			Value:   "default",
+			EnvVars: []string{"CAST_MODE"},
 		},
 		&cli.StringFlag{
 			Name:    "user",
 			Usage:   "The user to install against (cannot be root)",
-			EnvVars: []string{"SUDO_USER"},
+			EnvVars: []string{"SUDO_USER", "CAST_SUDO_USER"},
 		},
 		&cli.PathFlag{
-			Name:  "cache-path",
-			Usage: "The path where the tool caches files",
-			Value: "/var/cache/cast",
+			Name:    "cache-path",
+			Usage:   "The path where the tool caches files",
+			Value:   "/var/cache/cast",
+			EnvVars: []string{"CAST_CACHE_PATH"},
 		},
 		&cli.BoolFlag{
-			Name:  "no-cache",
-			Usage: "Do not use any cached files",
+			Name:    "no-cache",
+			Usage:   "Do not use any cached files",
+			EnvVars: []string{"CAST_NO_CACHE"},
 		},
 		// Hidden Flags
 		&cli.BoolFlag{
-			Name:   "dev",
-			Usage:  "(dev) Enable Development Mode",
-			Hidden: true,
+			Name:    "dev",
+			Usage:   "(dev) Enable Development Mode",
+			EnvVars: []string{"CAST_DEVELOPMENT_MODE"},
+			Hidden:  true,
 		},
 		&cli.BoolFlag{
-			Name:   "no-root-check",
-			Usage:  "(dev) disable checking if user is root",
-			Hidden: true,
+			Name:    "no-root-check",
+			Usage:   "(dev) disable checking if user is root",
+			EnvVars: []string{"CAST_NO_ROOT_CHECK"},
+			Hidden:  true,
 		},
 		&cli.BoolFlag{
 			Name:    "saltstack-test",
+			Usage:   "Enable SaltStack Test Mode",
 			Aliases: []string{"st"},
 			EnvVars: []string{"CAST_SALTSTACK_TEST"},
-			Usage:   "Enable SaltStack Test Mode",
 			Hidden:  true,
 		},
 		&cli.StringFlag{
 			Name:    "saltstack-state",
-			Aliases: []string{"ss"},
 			Usage:   "Specific SaltStack State to use as entrypoint",
+			Aliases: []string{"ss"},
+			EnvVars: []string{"CAST_SALTSTACK_STATE"},
 			Hidden:  true,
 		},
 		&cli.StringFlag{
-			Name:   "saltstack-file-root",
-			Usage:  "Use a specific directory for the file root for SaltStack",
-			Hidden: true,
+			Name:    "saltstack-file-root",
+			Usage:   "Use a specific directory for the file root for SaltStack",
+			Aliases: []string{"ssfr"},
+			EnvVars: []string{"CAST_SALTSTACK_FILE_ROOT"},
+			Hidden:  true,
 		},
 		&cli.StringFlag{
-			Name:   "saltstack-log-level",
-			Usage:  "Log level for Saltstack",
-			Value:  "info",
-			Hidden: true,
+			Name:    "saltstack-log-level",
+			Usage:   "Log level for Saltstack",
+			Value:   "info",
+			Aliases: []string{"ssll"},
+			EnvVars: []string{"CAST_SALTSTACK_LOG_LEVEL"},
+			Hidden:  true,
+		},
+		&cli.StringFlag{
+			Name:    "saltstack-install-mode",
+			Usage:   "Install Mode for Saltstack",
+			Value:   "binary",
+			Aliases: []string{"ssim"},
+			EnvVars: []string{"CAST_SALTSTACK_INSTALL_MODE"},
+			Hidden:  true,
 		},
 	}
 
