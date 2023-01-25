@@ -10,12 +10,12 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
+	"github.com/ekristen/cast/pkg/cosign"
 	"io"
 	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -544,22 +544,29 @@ func (d *GitHubDistro) verifyRelease() error {
 }
 
 func (d *GitHubDistro) validateSignature(dir string) error {
-	args := []string{
-		"verify-blob",
-		fmt.Sprintf("--key=%s", filepath.Join(dir, "cosign.pub")),
-		fmt.Sprintf("--signature=%s", filepath.Join(dir, "checksums.txt.sig")),
-		filepath.Join(dir, "checksums.txt"),
+	/*
+		args := []string{
+			"verify-blob",
+			fmt.Sprintf("--key=%s", filepath.Join(dir, "cosign.pub")),
+			fmt.Sprintf("--signature=%s", filepath.Join(dir, "checksums.txt.sig")),
+			filepath.Join(dir, "checksums.txt"),
+		}
+
+		var b bytes.Buffer
+
+		cmd := exec.CommandContext(d.ctx, "cosign", args...)
+		cmd.Stderr = &b
+		cmd.Stdout = &b
+
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("verify-blob: %s failed: %w: %s", "cosign", err, b.String())
+		}
+	*/
+
+	if err := cosign.Verify(context.TODO(), filepath.Join(dir, "cosign.pub"), filepath.Join(dir, "checksums.txt.sig"), filepath.Join(dir, "checksums.txt")); err != nil {
+		return err
 	}
 
-	var b bytes.Buffer
-
-	cmd := exec.CommandContext(d.ctx, "cosign", args...)
-	cmd.Stderr = &b
-	cmd.Stdout = &b
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("verify-blob: %s failed: %w: %s", "cosign", err, b.String())
-	}
 	return nil
 }
 
