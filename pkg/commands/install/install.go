@@ -185,6 +185,12 @@ func init() {
 			Usage:   "Do not use any cached files",
 			EnvVars: []string{"CAST_NO_CACHE"},
 		},
+		&cli.StringSliceFlag{
+			Name:    "variable",
+			Usage:   "Variable to be made available for saltstack pillar templates",
+			Aliases: []string{"var"},
+			EnvVars: []string{"CAST_VARIABLE"},
+		},
 		// Hidden Flags
 		&cli.BoolFlag{
 			Name:    "dev",
@@ -234,12 +240,6 @@ func init() {
 			Aliases: []string{"ssim"},
 			EnvVars: []string{"CAST_SALTSTACK_INSTALL_MODE"},
 			Hidden:  true,
-		},
-		&cli.StringSliceFlag{
-			Name:    "variable",
-			Usage:   "Variable to be made available for saltstack pillar templates",
-			Aliases: []string{"var"},
-			EnvVars: []string{"CAST_VARIABLE"},
 		},
 	}
 
