@@ -59,8 +59,18 @@ func Execute(c *cli.Context) error {
 		distroVersion = distroParts[1]
 	}
 
-	distroData := distro.Data{
-		User: c.String("user"),
+	distroData := map[string]string{
+		"User": c.String("user"),
+	}
+
+	pillars := c.StringSlice("variable")
+	for _, p := range pillars {
+		parts := strings.Split(p, "=")
+		if len(parts) != 2 {
+			log.Warnf("invalid saltstack pillar (%s)", p)
+			continue
+		}
+		distroData[parts[0]] = parts[1]
 	}
 
 	var dist distro.Distro
@@ -224,6 +234,12 @@ func init() {
 			Aliases: []string{"ssim"},
 			EnvVars: []string{"CAST_SALTSTACK_INSTALL_MODE"},
 			Hidden:  true,
+		},
+		&cli.StringSliceFlag{
+			Name:    "variable",
+			Usage:   "Variable to be made available for saltstack pillar templates",
+			Aliases: []string{"var"},
+			EnvVars: []string{"CAST_VARIABLE"},
 		},
 	}
 
