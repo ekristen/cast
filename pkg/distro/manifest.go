@@ -2,6 +2,7 @@ package distro
 
 import (
 	"bytes"
+	"github.com/Masterminds/sprig/v3"
 	"html/template"
 	"strings"
 
@@ -46,7 +47,7 @@ type Saltstack struct {
 func (m *Manifest) Render(data interface{}) error {
 	for name, val := range m.Saltstack.Pillars {
 		if strings.HasSuffix(name, "_template") {
-			tmpl, err := template.New("pillar_template").Parse(val)
+			tmpl, err := template.New("pillar_template").Funcs(sprig.FuncMap()).Parse(val)
 			if err != nil {
 				return err
 			}

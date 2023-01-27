@@ -74,14 +74,14 @@ type GitHubDistro struct {
 
 	archiveName string
 
-	data Data
+	data map[string]string
 }
 
 type LocalConfig struct {
 	Manifest *Manifest `yaml:"manifest"`
 }
 
-func NewGitHub(ctx context.Context, distro string, version *string, includePreReleases bool, githubToken string, data Data) (Distro, error) {
+func NewGitHub(ctx context.Context, distro string, version *string, includePreReleases bool, githubToken string, data map[string]string) (Distro, error) {
 	var d *GitHubDistro
 	if v, ok := aliases[distro]; ok {
 		d = v
@@ -101,7 +101,7 @@ func NewGitHub(ctx context.Context, distro string, version *string, includePreRe
 
 	if version != nil {
 		d.Version = *version
-		data.Version = d.Version
+		data["Version"] = d.Version
 	}
 
 	d.Name = fmt.Sprintf("%s_%s", d.Owner, d.Repo)
@@ -362,7 +362,7 @@ func (d *GitHubDistro) extractArchiveFile(dir string) error {
 		// check the file type
 		switch header.Typeflag {
 
-		// if its a dir and it doesn't exist create it
+		// if it's a dir and it doesn't exist create it
 		case tar.TypeDir:
 			log.Debug("extracting directory")
 
@@ -386,7 +386,7 @@ func (d *GitHubDistro) extractArchiveFile(dir string) error {
 				return err
 			}
 
-			// manually close here after each file operation; defering would cause each file close
+			// manually close here after each file operation; deferring would cause each file close
 			// to wait until all operations have completed.
 			f.Close()
 		}
@@ -573,7 +573,7 @@ func (d *GitHubDistro) validateChecksums(dir string) error {
 
 	checksumCount := len(hashByName)
 
-	log.WithField("count", checksumCount).Debug("found checkums to validate")
+	log.WithField("count", checksumCount).Debug("found checksum to validate")
 
 	if checksumCount < 2 {
 		return fmt.Errorf("validation failed: expected at least 2 files to validate, found: %d", checksumCount)
@@ -588,10 +588,13 @@ func (d *GitHubDistro) validateChecksums(dir string) error {
 		if err != nil {
 			return err
 		}
-		defer f.Close()
 
 		if _, err := io.Copy(hasher, f); err != nil {
 			return err
+		}
+
+		if err := f.Close(); err != nil {
+			log.WithError(err).Error("unable to close file")
 		}
 
 		actual := fmt.Sprintf("%x", hasher.Sum(nil))

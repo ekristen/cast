@@ -90,18 +90,18 @@ func (i *Installer) Run() (err error) {
 	i.pillarJSON = string(pillarJSON)
 
 	i.log.Debug("configuring saltstack installer")
-	sconfig := saltstack.NewConfig()
-	sconfig.Path = filepath.Join(i.config.CachePath, "saltstack")
+	saltConfig := saltstack.NewConfig()
+	saltConfig.Path = filepath.Join(i.config.CachePath, "saltstack")
 
 	i.log.Info("running saltstack installer")
-	sinstaller := saltstack.New(sconfig)
-	sinstaller.SetMode(saltstack.Binary)
+	saltInstaller := saltstack.New(saltConfig)
+	saltInstaller.SetMode(saltstack.Binary)
 
-	if err := sinstaller.Run(i.ctx); err != nil {
+	if err := saltInstaller.Run(i.ctx); err != nil {
 		return err
 	}
 
-	i.command = sinstaller.GetBinary()
+	i.command = saltInstaller.GetBinary()
 	if i.command == "" {
 		return fmt.Errorf("unable to resolve salt binary to use")
 	}
