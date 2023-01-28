@@ -1,8 +1,10 @@
 # Cast (Status: Beta)
 
-Cast is an installer tool for any Cast compatible distribution like [SIFT](https://github.com/teamdfir/sift) or [REMNUX](https://github.com/remnux/remnux).
+Cast is a command line utility that abstracts away [SaltStack](https://saltproject.io) for compatible configurations.
 
-The goal of Cast is to deliver a simple command line utility to install custom distributions that are build with [saltstack](https://saltproject.io).
+It is the sucessor to the [SIFT CLI](https://github.com/teamdfir/sift-cli) but made in such a way that it is no longer specific to [SIFT](https://github.com/teamdfir/sift).
+
+The goal is to deliver a simple command line utility to install custom distributions that are build with [saltstack](https://saltproject.io).
 
 [![asciicast](https://asciinema.org/a/463178.svg)](https://asciinema.org/a/463178)
 
@@ -12,17 +14,23 @@ The goal of Cast is to deliver a simple command line utility to install custom d
 cast install <owner/repo|alias>
 ```
 
+```bash
+cast install teamdfir/sift-saltstack
+```
+
+### Existing Aliases
+
+Cast comes with two built in aliases for existing support distributions, additional aliases will not be added, it's a short term solution until the older install methods have fallen off.
+
 **Note:** there are only two aliases currently supported, `sift` and `remnux` which are resolved to `teamdfir/sift-saltstack` and `remnux/salt-states` respectively.
 
-## Dependencies
+## What is a Cast Distribution?
 
-* [cosign](https://github.com/sigstore/cosign) - required for release and verification
+Simply put a cast distro is one published by the cast binary. The underlying technology used for installing the distro is Saltstack.
 
-## What is a Cast Distro?
+To create a Cast distribution you need a `.cast.yml` file and need your repository to be a valid SaltStack configuration that would work with a `state.apply` command.
 
-Simply put a cast distro is one published by the cast binary, however it's a bit more complicated than that.
-
-The underlying technology used for installing the distro is Saltstack.
+### Existing Distributions
 
 There are only two (2) version 1 cast distros out there and they are SIFT and REMnux and what makes them a v1 is the way the release files are generated and signed and how the saltstack files are organized in the repository.
 
