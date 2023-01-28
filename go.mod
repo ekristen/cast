@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/ProtonMail/gopenpgp/v2 v2.5.1
+	github.com/ProtonMail/gopenpgp/v2 v2.5.2
 	github.com/google/go-github/v41 v41.0.0
 	github.com/google/go-github/v50 v50.0.0
 	github.com/otiai10/copy v1.9.0
@@ -39,7 +39,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
-	github.com/ProtonMail/go-crypto v0.0.0-20221026131551-cf6655e29de4 // indirect
+	github.com/ProtonMail/go-crypto v0.0.0-20230124153114-0acdc8ae009b // indirect
 	github.com/ProtonMail/go-mime v0.0.0-20221031134845-8fd9bc37cf08 // indirect
 	github.com/ThalesIgnite/crypto11 v1.2.5 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
