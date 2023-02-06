@@ -10,7 +10,6 @@ import (
 	"crypto/sha512"
 	"errors"
 	"fmt"
-	"github.com/ekristen/cast/pkg/cosign"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -18,6 +17,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/ekristen/cast/pkg/cosign"
 
 	"github.com/ekristen/cast/pkg/common"
 	"github.com/ekristen/cast/pkg/sysinfo"
@@ -425,19 +426,29 @@ func (d *GitHubDistro) downloadReleaseAsset(url, filename, dir string) error {
 func (d *GitHubDistro) fetchReleases(ctx context.Context) error {
 	d.log.Debugf("fetching releases")
 
-	allreleases, _, err := d.github.Repositories.ListReleases(ctx, d.Owner, d.Repo, &github.ListOptions{})
+	allReleases, _, err := d.github.Repositories.ListReleases(ctx, d.Owner, d.Repo, &github.ListOptions{})
 	if err != nil {
 		d.log.WithError(err).Error("error listing releases from github")
 		return err
 	}
 
-	if len(allreleases) == 0 {
+	var filteredReleases = make([]*github.RepositoryRelease, 0)
+
+	for _, r := range allReleases {
+		if !d.IncludePreReleases && r.Prerelease == github.Bool(true) {
+			continue
+		}
+
+		filteredReleases = append(filteredReleases, r)
+	}
+
+	if len(filteredReleases) == 0 {
 		err := fmt.Errorf("repository has no releases")
 		d.log.Error("repository has no releases")
 		return err
 	}
 
-	d.releases = allreleases
+	d.releases = filteredReleases
 	if d.Version != "" {
 		for _, r := range d.releases {
 			if r.GetTagName() == d.Version {
