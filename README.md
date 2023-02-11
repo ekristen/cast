@@ -8,6 +8,10 @@ The goal is to deliver a simple command line utility to install custom distribut
 
 [![asciicast](https://asciinema.org/a/463178.svg)](https://asciinema.org/a/463178)
 
+## Installation
+
+Visit the releases page to download the appropriate file for your architecture. There are `.deb` files for installation with `dpkg -i`, there are just vanilla binaries that you can download and put into `/usr/local/bin` if you'd like to as well.
+
 ## Usage
 
 ```bash
