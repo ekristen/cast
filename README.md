@@ -22,6 +22,12 @@ cast install <owner/repo|alias>
 cast install teamdfir/sift-saltstack
 ```
 
+**Note:** If you want installation on WSL or Server. You need to specify option `--mode=server`. See the example command below. More options can be see that for `cast install help`.
+
+```bash
+cast install --mode=server teamdfir/sift-saltstack
+```
+
 ### Existing Aliases
 
 Cast comes with two built in aliases for existing support distributions, additional aliases will not be added, it's a short term solution until the older install methods have fallen off.
