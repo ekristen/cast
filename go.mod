@@ -8,6 +8,7 @@ require (
 	github.com/ProtonMail/gopenpgp/v2 v2.6.1
 	github.com/google/go-github/v41 v41.0.0
 	github.com/google/go-github/v50 v50.0.0
+	github.com/google/go-github/v51 v51.0.0
 	github.com/otiai10/copy v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/wrangler v0.8.6
