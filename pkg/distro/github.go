@@ -116,14 +116,14 @@ func NewGitHub(ctx context.Context, distro string, version *string, includePreRe
 			&oauth2.Token{AccessToken: githubToken},
 		)
 		d.http = oauth2.NewClient(d.ctx, ts)
-		d.github = github.NewClient(d.http)
+		d.github = github.NewClientWithEnvProxy(d.http)
 
 		d.dlHttp = &http.Client{
-			Transport: &transport{token: githubToken, underlyingTransport: http.DefaultTransport},
+			Transport: &transport{token: githubToken, underlyingTransport: http.DefaultTransport, Proxy: http.ProxyFromEnvironment},
 		}
 	} else {
 		logrus.Warn("using unauthenticated github client, could result in API rate limiting")
-		d.github = github.NewClient(nil)
+		d.github = github.NewClientWithEnvProxy(nil)
 	}
 
 	d.log = logrus.WithField("component", "distro").WithField("owner", d.Owner).WithField("repo", d.Repo)

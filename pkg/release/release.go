@@ -117,7 +117,7 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 		gh = github.NewClient(oauth2.NewClient(ctx, ts))
 		dl = &http.Client{
-			Transport: &transport{token: runConfig.GitHubToken, underlyingTransport: http.DefaultTransport},
+			Transport: &transport{token: runConfig.GitHubToken, underlyingTransport: http.DefaultTransport, Proxy: http.ProxyFromEnvironment},
 		}
 	} else {
 		return fmt.Errorf("unable to perform release without a valid github token")
