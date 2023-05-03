@@ -19,7 +19,7 @@ import (
 	"github.com/ekristen/cast/pkg/config"
 	"github.com/ekristen/cast/pkg/git"
 	"github.com/ekristen/cast/pkg/utils"
-	"github.com/google/go-github/v41/github"
+	"github.com/google/go-github/v52/github"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -117,7 +117,7 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 		gh = github.NewClient(oauth2.NewClient(ctx, ts))
 		dl = &http.Client{
-			Transport: &transport{token: runConfig.GitHubToken, underlyingTransport: http.DefaultTransport, Proxy: http.ProxyFromEnvironment},
+			Transport: &transport{token: runConfig.GitHubToken, underlyingTransport: http.DefaultTransport},
 		}
 	} else {
 		return fmt.Errorf("unable to perform release without a valid github token")
