@@ -24,7 +24,7 @@ import (
 	"github.com/ekristen/cast/pkg/sysinfo"
 	"github.com/ekristen/cast/pkg/utils"
 
-	"github.com/google/go-github/v41/github"
+	"github.com/google/go-github/v52/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 
@@ -111,6 +111,7 @@ func NewGitHub(ctx context.Context, distro string, version *string, includePreRe
 	d.data = data
 
 	if githubToken != "" {
+		// TODO - add proxy env vars to the auth'd client as well
 		logrus.Debug("using authenticated github client")
 		ts := oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: githubToken},
@@ -123,7 +124,7 @@ func NewGitHub(ctx context.Context, distro string, version *string, includePreRe
 		}
 	} else {
 		logrus.Warn("using unauthenticated github client, could result in API rate limiting")
-		d.github = github.NewClient(nil)
+		d.github = github.NewClientWithEnvProxy()
 	}
 
 	d.log = logrus.WithField("component", "distro").WithField("owner", d.Owner).WithField("repo", d.Repo)
