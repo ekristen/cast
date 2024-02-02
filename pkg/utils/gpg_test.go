@@ -141,12 +141,16 @@ func Test_GPGSign(t *testing.T) {
 
 	dir, err := ioutil.TempDir(os.TempDir(), "utils-gpg-")
 	assert.NoError(t, err)
-	defer os.RemoveAll(dir)
+	defer func(path string) {
+		_ = os.RemoveAll(path)
+	}(dir)
 
-	os.Chdir(dir)
+	err = os.Chdir(dir)
+	assert.NoError(t, err)
 
 	bigBuff := make([]byte, 5000000)
-	ioutil.WriteFile("bigfile.test", bigBuff, 0666)
+	err = os.WriteFile("bigfile.test", bigBuff, 0666)
+	assert.NoError(t, err)
 
 	err = GPGSign(dir, "bigfile.test", "bigfile.test.asc", []byte(PrivatePGPKey), true)
 	assert.NoError(t, err)
@@ -157,5 +161,6 @@ func Test_GPGSign(t *testing.T) {
 	err = GPGVerify(dir, "bigfile.test", "bigfile.test.asc", []byte(PublicPGPKey))
 	assert.NoError(t, err)
 
-	os.Chdir(cwd)
+	err = os.Chdir(cwd)
+	assert.NoError(t, err)
 }

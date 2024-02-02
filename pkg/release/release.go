@@ -218,11 +218,13 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 	checksumFileLine := fmt.Sprintf("%s %s\n", checksum, filepath.Base(filename))
 
-	checksumsFile.Write([]byte(checksumFileLine))
+	if _, err := checksumsFile.Write([]byte(checksumFileLine)); err != nil {
+		return err
+	}
 
-	log.Info("checksumming manifest.yml")
+	log.Info("check-summing manifest.yml")
 
-	d, err := ioutil.ReadFile(mfilename)
+	d, err := os.ReadFile(mfilename)
 	if err != nil {
 		return errors.Wrap(err, "unable to open manifest file")
 	}
@@ -231,7 +233,11 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 	hasher.Write(d)
 	checksum = fmt.Sprintf("%x", hasher.Sum(nil))
 
-	checksumsFile.Write([]byte(fmt.Sprintf("%s %s\n", checksum, filepath.Base(mfilename))))
+	if _, err := checksumsFile.Write(
+		[]byte(fmt.Sprintf("%s %s\n", checksum, filepath.Base(mfilename))),
+	); err != nil {
+		return err
+	}
 
 	if err := checksumsFile.Close(); err != nil {
 		return err

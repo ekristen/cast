@@ -11,7 +11,6 @@ import (
 func Test_Run(t *testing.T) {
 	cwd, temp := setup(t)
 	defer teardown(t, cwd, temp)
-
 }
 
 func setup(t *testing.T) (string, string) {

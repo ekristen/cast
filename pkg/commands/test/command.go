@@ -26,7 +26,9 @@ func Execute(c *cli.Context) error {
 		if err := os.Chdir(c.Path("dir")); err != nil {
 			return err
 		}
-		defer os.Chdir(cwd)
+		defer func(dir string) {
+			_ = os.Chdir(dir)
+		}(cwd)
 	}
 
 	state := c.Args().First()

@@ -29,6 +29,7 @@ type Mode int
 const (
 	Package Mode = iota
 	Binary
+	OneDir
 )
 
 type Meta struct {
@@ -86,6 +87,8 @@ func (i *Installer) GetBinary() string {
 		return filepath.Join(i.Config.Path, "salt")
 	case Package:
 		return "/usr/bin/salt-call"
+	case OneDir:
+		return filepath.Join(i.Config.Path, "salt-call")
 	}
 
 	return ""
@@ -96,7 +99,10 @@ func (i *Installer) GetMode() Mode {
 }
 
 func (i *Installer) Run(ctx context.Context) error {
-	os.MkdirAll(i.Config.Path, 0755)
+	err := os.MkdirAll(i.Config.Path, 0755)
+	if err != nil {
+		return err
+	}
 
 	metadata := Meta{
 		Version:      Version,
@@ -110,9 +116,17 @@ func (i *Installer) Run(ctx context.Context) error {
 		return i.installBinary(ctx, metadata)
 	case Package:
 		return i.installPackage(ctx, metadata)
+	case OneDir:
+		return i.installOneDir(ctx, metadata)
 	default:
 		return fmt.Errorf("unsupported install mode")
 	}
+}
+
+func (i *Installer) installOneDir(ctx context.Context, metadata Meta) error {
+	// log := i.log.WithField("handler", "install-onedir")
+
+	return nil
 }
 
 func (i *Installer) installBinary(ctx context.Context, metadata Meta) error {

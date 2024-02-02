@@ -2,20 +2,21 @@ package install
 
 import (
 	"fmt"
-	"github.com/ekristen/cast/pkg/saltstack"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/rancher/wrangler/pkg/signals"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 
 	"github.com/ekristen/cast/pkg/cache"
 	"github.com/ekristen/cast/pkg/commands"
 	"github.com/ekristen/cast/pkg/common"
 	"github.com/ekristen/cast/pkg/distro"
 	"github.com/ekristen/cast/pkg/installer"
-	"github.com/rancher/wrangler/pkg/signals"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/ekristen/cast/pkg/saltstack"
 )
 
 func Execute(c *cli.Context) error {
