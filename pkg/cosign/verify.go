@@ -45,10 +45,10 @@ func Verify(ctx context.Context, keyRef, sigRef, blobRef string) error {
 	}
 
 	co := &cosign.CheckOpts{
-		IgnoreSCT:      true,
-		Identities:     identities,
-		Offline:        true,
-		SkipTlogVerify: true,
+		IgnoreSCT:  true,
+		Identities: identities,
+		Offline:    true,
+		IgnoreTlog: true,
 	}
 
 	co.SigVerifier, err = sigs.PublicKeyFromKeyRef(ctx, keyRef)
