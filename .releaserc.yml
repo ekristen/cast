@@ -1,0 +1,16 @@
+plugins:
+  - "@semantic-release/commit-analyzer"
+  - "@semantic-release/release-notes-generator"
+  - - "@semantic-release/github"
+    - successComment: |
+        :tada: This ${issue.pull_request ? 'pull request is included' : 'issue has been resolved'} in version ${nextRelease.version} :tada:
+
+        The release is available on [GitHub release](https://github.com/ekristen/test-aws-nuke/releases/tag/${nextRelease.gitTag}) :rocket:
+
+branches:
+  - name: +([0-9])?(.{+([0-9]),x}).x
+  - name: main
+  - name: next
+    prerelease: true
+  - name: pre/rc
+    prerelease: '${name.replace(/^pre\\//g, "")}'
