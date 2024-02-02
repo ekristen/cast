@@ -1,74 +1,86 @@
-name: release
+name: goreleaser
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
+      - next
     tags:
-      - "v*"
+      - "*"
+  release:
+    types:
+      - published
 
 permissions:
   contents: write
   packages: write
 
 jobs:
-  goreleaser:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: github.event_name == 'pull_request'
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/checkout@v3
-        if: github.event_name == 'push'
+      - uses: actions/checkout@v4
+        if: github.event_name != 'pull_request'
         with:
           fetch-depth: 0
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      - name: setup-go
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.18
-      - name: Install Cosign
+          go-version: 1.21.x
+      - name: setup qemu
+        id: qemu
+        uses: docker/setup-qemu-action@v3
+      - name: setup docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: install cosign
         uses: sigstore/cosign-installer@main
         with:
-          cosign-release: "v1.4.1"
-      - name: Setup Cosign
+          cosign-release: "v2.0.1"
+      - name: setup cosign
         run: |
           echo "${COSIGN_KEY}" > "$GITHUB_WORKSPACE/cosign.key"
         env:
           COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
-      - name: Setup PGP
-        run: |
-          echo "${PGP_KEY}" > "$GITHUB_WORKSPACE/pgp.key"
-        env:
-          PGP_KEY: ${{ secrets.NFPM_GPG_KEY }}
-      - name: Set GoReleaser Default Args
+      - name: set goreleaser default args
         if: startsWith(github.ref, 'refs/tags/') == true
         run: |
           echo "GORELEASER_ARGS=" >> $GITHUB_ENV
-      - name: Set GoReleaser Options for Branch
+      - name: set goreleaser args for branch
         if: startsWith(github.ref, 'refs/tags/') == false
         run: |
           echo "GORELEASER_ARGS=--snapshot" >> $GITHUB_ENV
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+      - name: set goreleaser args renovate
+        if: startsWith(github.ref, 'refs/heads/renovate') == true
+        run: |
+          echo "GORELEASER_ARGS=--snapshot --skip-publish" >> $GITHUB_ENV
+      - name: run goreleaser
+        uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist ${{ env.GORELEASER_ARGS }}
+          args: release --clean ${{ env.GORELEASER_ARGS }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-          NFPM_GPG_KEY: "./pgp.key"
-          NFPM_CAST_PASSPHRASE: ${{ secrets.NFPM_CAST_PASSPHRASE }}
-      - name: Save Release Files
-        uses: actions/upload-artifact@v3
-        if: startsWith(github.ref, 'refs/tags/') == false
+      - name: push docker images (for branches)
+        if: github.ref == 'refs/heads/main' || github.event.pull_request.base.ref == 'main'
+        run: |
+          docker images --format "{{.Repository}}:{{.Tag}}" | grep "${{ github.repository }}" | xargs -L1 docker push
+      - name: upload artifacts
+        if: github.event.pull_request.base.ref == 'main'
+        uses: actions/upload-artifact@v4
         with:
-          name: release
-          path: |
-            release/*.tar.gz
-            release/checksums.txt*
+          name: binaries
+          path: releases/*.tar.gz
