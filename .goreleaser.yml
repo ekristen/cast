@@ -50,7 +50,7 @@ signs:
   - cmd: cosign
     stdin: "{{ .Env.COSIGN_PASSWORD }}"
     args:
-      ["sign-blob", "--key=cosign.key", "--output=${signature}", "${artifact}"]
+      ["sign-blob", "--yes", "--tlog-upload=false", "--key=cosign.key", "--output-signature=${signature}", "${artifact}"]
     artifacts: all
 nfpms:
   - id: cast
