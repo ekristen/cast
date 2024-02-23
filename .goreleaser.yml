@@ -50,7 +50,7 @@ archives:
   - id: cast
     builds:
       - cast
-    name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ .Arm }}"
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ .Arm }}"
     format_overrides:
       - goos: windows
         format: zip
@@ -69,7 +69,7 @@ nfpms:
     builds:
       - cast
     vendor: ekristen.dev
-    file_name_template: "{{ .PackageName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}"
+    file_name_template: "{{ .PackageName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}-{{ . }}{{ end }}"
     homepage: https://github.com/ekristen/cast
     maintainer: Erik Kristensen <erik@erikkristensen.com>
     description: Cast is an installer tool for any Cast compatible distro
