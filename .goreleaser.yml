@@ -28,16 +28,24 @@ builds:
     goarch:
       - amd64
       - arm64
-    ignore:
-      - goos: darwin
-        goarch: arm64
     ldflags:
       - -s
       - -w
+      - -extldflags="-static"
       - -X '{{ .ModulePath }}/pkg/common.SUMMARY=v{{ .Version }}'
       - -X '{{ .ModulePath }}/pkg/common.BRANCH={{ .Branch }}'
       - -X '{{ .ModulePath }}/pkg/common.VERSION={{ .Tag }}'
       - -X '{{ .ModulePath }}/pkg/common.COMMIT={{ .Commit }}'
+    hooks:
+      post:
+        - cmd: |
+            {{- if eq .Os "darwin" -}} 
+            quill sign-and-notarize "{{ .Path }}" --dry-run={{ .IsSnapshot }} --ad-hoc={{ .IsSnapshot }} -vv
+            {{- else -}}
+            true
+            {{- end -}}
+          env:
+            - QUILL_LOG_FILE=/tmp/quill-{{ .Target }}.log
 archives:
   - id: cast
     builds:
@@ -47,10 +55,13 @@ archives:
       - goos: windows
         format: zip
 signs:
-  - cmd: cosign
-    stdin: "{{ .Env.COSIGN_PASSWORD }}"
-    args:
-      ["sign-blob", "--yes", "--tlog-upload=false", "--key=cosign.key", "--output-signature=${signature}", "${artifact}"]
+  - ids:
+      - default
+      - darwin
+    cmd: cosign
+    signature: "${artifact}.sig"
+    certificate: "${artifact}.pem"
+    args: ["sign-blob", "--yes", "--oidc-provider=github", "--oidc-issuer=https://token.actions.githubusercontent.com", "--output-certificate=${certificate}", "--output-signature=${signature}", "${artifact}"]
     artifacts: all
 nfpms:
   - id: cast
