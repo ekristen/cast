@@ -7,7 +7,7 @@ toolchain go1.21.6
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/ProtonMail/gopenpgp/v2 v2.7.4
+	github.com/ProtonMail/gopenpgp/v2 v2.7.5
 	github.com/google/go-github/v41 v41.0.0
 	github.com/google/go-github/v50 v50.2.0
 	github.com/otiai10/copy v1.14.0
@@ -17,8 +17,8 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.27.1
-	golang.org/x/crypto v0.18.0
-	golang.org/x/oauth2 v0.16.0
+	golang.org/x/crypto v0.19.0
+	golang.org/x/oauth2 v0.17.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -216,10 +216,10 @@ require (
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/exp v0.0.0-20231108232855-2478ac86f678 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/term v0.16.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/term v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.15.0 // indirect
