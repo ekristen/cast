@@ -383,7 +383,7 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 
 func signFile(ctx context.Context, file string) error {
 	out := fmt.Sprintf("%s.sig", file)
-	args := []string{"sign-blob", "--key=cosign.key", "--output-signature=" + out, file}
+	args := []string{"sign-blob", "--yes", "--tlog-upload=false", "--key=cosign.key", "--output-signature=" + out, file}
 
 	var b bytes.Buffer
 
