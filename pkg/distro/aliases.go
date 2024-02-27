@@ -7,6 +7,12 @@ var aliases map[string]*GitHubDistro = map[string]*GitHubDistro{
 		Alias:   "sift",
 		IsAlias: true,
 	},
+	"teamdfir/sift": {
+		Owner:   "teamdfir",
+		Repo:    "sift-saltstack",
+		Alias:   "sift",
+		IsAlias: true,
+	},
 	"teamdfir/sift-saltstack": {
 		Owner:   "teamdfir",
 		Repo:    "sift-saltstack",
