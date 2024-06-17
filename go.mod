@@ -12,7 +12,8 @@ require (
 	github.com/google/go-github/v60 v60.0.0
 	github.com/otiai10/copy v1.14.0
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/wrangler v0.8.6
+	github.com/rancher/wrangler v1.1.2
+	github.com/rancher/wrangler/v2 v2.1.4
 	github.com/sigstore/cosign/v2 v2.2.4
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
@@ -144,9 +145,9 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/api v0.28.3 // indirect
-	k8s.io/apimachinery v0.28.3 // indirect
-	k8s.io/client-go v0.28.3 // indirect
+	k8s.io/api v0.28.6 // indirect
+	k8s.io/apimachinery v0.28.6 // indirect
+	k8s.io/client-go v0.28.6 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
