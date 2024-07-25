@@ -46,5 +46,8 @@
         "labels": ["security"],
         "automerge": true,
         "assignees": ["@ekristen"]
-    }
+    },
+    "postUpdateOptions": [
+        "gomodUpdateImportPaths"
+    ]
 }
