@@ -19,7 +19,7 @@ import (
 	"github.com/ekristen/cast/pkg/config"
 	"github.com/ekristen/cast/pkg/git"
 	"github.com/ekristen/cast/pkg/utils"
-	"github.com/google/go-github/v59/github"
+	"github.com/google/go-github/v63/github"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
