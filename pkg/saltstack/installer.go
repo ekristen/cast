@@ -1,8 +1,10 @@
 package saltstack
 
 import (
+	"archive/tar"
 	"bufio"
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/sha512"
 	"errors"
@@ -15,6 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/blakesmith/ar"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ekristen/cast/pkg/sysinfo"
@@ -124,7 +127,32 @@ func (i *Installer) Run(ctx context.Context) error {
 }
 
 func (i *Installer) installOneDir(ctx context.Context, metadata Meta) error {
-	// log := i.log.WithField("handler", "install-onedir")
+	log := i.log.WithField("handler", "install-onedir")
+	switch metadata.OS.Vendor {
+	case "ubuntu":
+		log.Debug("installing saltstack onedir on ubuntu")
+
+		debFile := "https://repo.saltproject.io/salt/py3/ubuntu/22.04/amd64/latest/pool/salt-common_3007.1_amd64.deb"
+
+		if err := utils.DownloadFile(ctx, debFile, "/tmp/salt-common.deb", nil, nil); err != nil {
+			return err
+		}
+
+		tmpDir, err := os.MkdirTemp("/tmp", "cast")
+		if err != nil {
+			return err
+		}
+
+		if err := i.extractDeb("/tmp/salt-common.deb", tmpDir); err != nil {
+			return err
+		}
+
+		if err := i.copyDir(filepath.Join(tmpDir, "./opt/saltstack"), i.Config.Path); err != nil {
+			return err
+		}
+
+		fmt.Println(i.Config.Path)
+	}
 
 	return nil
 }
@@ -429,4 +457,108 @@ func (i *Installer) validateSignature(filename string) error {
 	}
 
 	return nil
+}
+
+func (i *Installer) extractDeb(debFile, destDir string) error {
+	file, err := os.Open(debFile)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	arReader := ar.NewReader(file)
+	for {
+		header, err := arReader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		if strings.HasPrefix(header.Name, "data.tar") {
+			var tarReader *tar.Reader
+			if strings.HasSuffix(header.Name, ".gz") {
+				gzReader, err := gzip.NewReader(arReader)
+				if err != nil {
+					return err
+				}
+				defer gzReader.Close()
+				tarReader = tar.NewReader(gzReader)
+			} else {
+				tarReader = tar.NewReader(arReader)
+			}
+
+			for {
+				tarHeader, err := tarReader.Next()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					return err
+				}
+
+				target := filepath.Join(destDir, tarHeader.Name)
+				switch tarHeader.Typeflag {
+				case tar.TypeDir:
+					if err := os.MkdirAll(target, os.FileMode(tarHeader.Mode)); err != nil {
+						return err
+					}
+				case tar.TypeReg:
+					outFile, err := os.Create(target)
+					if err != nil {
+						return err
+					}
+					if _, err := io.Copy(outFile, tarReader); err != nil {
+						outFile.Close()
+						return err
+					}
+					outFile.Close()
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (i *Installer) copyDir(src, dest string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+
+		destPath := filepath.Join(dest, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(destPath, info.Mode())
+		}
+
+		return i.copyFile(path, destPath)
+	})
+}
+
+func (i *Installer) copyFile(src, dest string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+
+	return out.Close()
 }
