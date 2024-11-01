@@ -282,6 +282,10 @@ func (i *Installer) installPackageKey(ctx context.Context) error {
 
 	log.Info("downloading saltstack package key")
 
+	if err := os.MkdirAll(filepath.Base(RepoKeyFile), 0755); err != nil {
+		return err
+	}
+
 	if err := utils.DownloadFile(ctx, RepoKeyURL, RepoKeyFile, nil, nil); err != nil {
 		return err
 	}
