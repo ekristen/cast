@@ -227,19 +227,36 @@ func (i *Installer) installPackage(ctx context.Context, metadata Meta) error {
 			return err
 		}
 
-		if !exists {
+		saltCallExists, err := utils.FileExists("/usr/bin/salt-call")
+		if err != nil {
+			return err
+		}
+
+		if !saltCallExists {
 			runAptGetInstall = true
 		}
 
 		if runAptGetUpdate || runAptGetInstall {
+			i.log.Info("updating apt")
 			if err := i.runCommand(ctx, "apt-get", "update"); err != nil {
+				i.log.WithError(err).Error("unable to run apt-get update")
 				return err
 			}
 		}
 
 		if runAptGetInstall {
-			args := []string{"install", "-o", `Dpkg::Options::="--force-confdef"`, "-o", `Dpkg::Options::="--force-confold"`, "-y", "--allow-change-held-packages", "salt-common"}
+			i.log.Info("installing saltstack")
+			args := []string{
+				"install",
+				"-o", "Dpkg::Options::=--force-confdef",
+				"-o", "Dpkg::Options::=--force-confold",
+				"-y",
+				"--allow-change-held-packages",
+				"--no-install-suggests",
+				"salt-common",
+			}
 			if err := i.runCommand(ctx, "apt-get", args...); err != nil {
+				i.log.WithError(err).Error("unable to apt-get install salt-common")
 				return err
 			}
 		}
@@ -305,8 +322,9 @@ func (i *Installer) runCommand(ctx context.Context, command string, args ...stri
 
 	scanner := bufio.NewScanner(stdout)
 	for scanner.Scan() {
-		m := strings.TrimPrefix(scanner.Text(), "# ")
-		log.Trace(m)
+		pre := scanner.Text()
+		pre = strings.TrimPrefix(pre, "# ")
+		log.Trace(pre)
 	}
 
 	cmd.Wait()
