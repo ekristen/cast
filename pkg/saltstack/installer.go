@@ -194,6 +194,10 @@ func (i *Installer) installPackage(ctx context.Context, metadata Meta) error {
 		runAptGetUpdate := false
 		runAptGetInstall := false
 
+		if err := i.installPackageKey(ctx); err != nil {
+			return err
+		}
+
 		exists, err := utils.FileExists("/etc/apt/sources.list.d/saltstack.list")
 		if err != nil {
 			return err
@@ -212,31 +216,47 @@ func (i *Installer) installPackage(ctx context.Context, metadata Meta) error {
 			return err
 		}
 
-		if !exists {
-			aptRepo, err := metadata.Render(APTRepo)
-			if err != nil {
-				return err
-			}
+		aptRepo, err := metadata.Render(APTRepo)
+		if err != nil {
+			return err
+		}
 
-			i.log.Debugf("apt repo: %s", aptRepo)
+		i.log.Debugf("apt repo: %s", aptRepo)
 
-			if err := ioutil.WriteFile("/etc/apt/sources.list.d/salt.list", []byte(aptRepo), 0644); err != nil {
-				return err
-			}
+		if err := os.WriteFile("/etc/apt/sources.list.d/salt.list", []byte(aptRepo), 0644); err != nil {
+			return err
+		}
+
+		saltCallExists, err := utils.FileExists("/usr/bin/salt-call")
+		if err != nil {
+			return err
+		}
+
+		if !saltCallExists {
 			runAptGetInstall = true
-		} else {
-			i.log.Debug("salt configured with apt")
 		}
 
 		if runAptGetUpdate || runAptGetInstall {
+			i.log.Info("updating apt")
 			if err := i.runCommand(ctx, "apt-get", "update"); err != nil {
+				i.log.WithError(err).Error("unable to run apt-get update")
 				return err
 			}
 		}
 
 		if runAptGetInstall {
-			args := []string{"install", "-o", `Dpkg::Options::="--force-confdef"`, "-o", `Dpkg::Options::="--force-confold"`, "-y", "--allow-change-held-packages", "salt-common"}
+			i.log.Info("installing saltstack")
+			args := []string{
+				"install",
+				"-o", "Dpkg::Options::=--force-confdef",
+				"-o", "Dpkg::Options::=--force-confold",
+				"-y",
+				"--allow-change-held-packages",
+				"--no-install-suggests",
+				"salt-common",
+			}
 			if err := i.runCommand(ctx, "apt-get", args...); err != nil {
+				i.log.WithError(err).Error("unable to apt-get install salt-common")
 				return err
 			}
 		}
@@ -253,6 +273,20 @@ func (i *Installer) installPackage(ctx context.Context, metadata Meta) error {
 	default:
 		return fmt.Errorf("unsupported operating system: %s", metadata.OS.Vendor)
 	}
+
+	return nil
+}
+
+func (i *Installer) installPackageKey(ctx context.Context) error {
+	log := i.log.WithField("handler", "install-package-key")
+
+	log.Info("downloading saltstack package key")
+
+	if err := utils.DownloadFile(ctx, RepoKeyURL, RepoKeyFile, nil, nil); err != nil {
+		return err
+	}
+
+	log.Info("saltstack package key downloaded")
 
 	return nil
 }
@@ -288,8 +322,9 @@ func (i *Installer) runCommand(ctx context.Context, command string, args ...stri
 
 	scanner := bufio.NewScanner(stdout)
 	for scanner.Scan() {
-		m := strings.TrimPrefix(scanner.Text(), "# ")
-		log.Trace(m)
+		pre := scanner.Text()
+		pre = strings.TrimPrefix(pre, "# ")
+		log.Trace(pre)
 	}
 
 	cmd.Wait()

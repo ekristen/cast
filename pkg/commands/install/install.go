@@ -127,8 +127,8 @@ func Execute(c *cli.Context) error {
 	}
 
 	ssim := saltstack.Package
-	if c.String("saltstack-install-mode") == "binary" {
-		ssim = saltstack.Binary
+	if c.String("saltstack-install-mode") != "package" {
+		return fmt.Errorf("due to changes with salt, the only install method is temporarily via package and apt")
 	}
 
 	config := &installer.Config{
@@ -237,7 +237,7 @@ func init() {
 		&cli.StringFlag{
 			Name:    "saltstack-install-mode",
 			Usage:   "Install Mode for Saltstack",
-			Value:   "binary",
+			Value:   "package",
 			Aliases: []string{"ssim"},
 			EnvVars: []string{"CAST_SALTSTACK_INSTALL_MODE"},
 			Hidden:  true,
