@@ -194,6 +194,10 @@ func (i *Installer) installPackage(ctx context.Context, metadata Meta) error {
 		runAptGetUpdate := false
 		runAptGetInstall := false
 
+		if err := i.installPackageKey(ctx); err != nil {
+			return err
+		}
+
 		exists, err := utils.FileExists("/etc/apt/sources.list.d/saltstack.list")
 		if err != nil {
 			return err
@@ -212,20 +216,19 @@ func (i *Installer) installPackage(ctx context.Context, metadata Meta) error {
 			return err
 		}
 
+		aptRepo, err := metadata.Render(APTRepo)
+		if err != nil {
+			return err
+		}
+
+		i.log.Debugf("apt repo: %s", aptRepo)
+
+		if err := os.WriteFile("/etc/apt/sources.list.d/salt.list", []byte(aptRepo), 0644); err != nil {
+			return err
+		}
+
 		if !exists {
-			aptRepo, err := metadata.Render(APTRepo)
-			if err != nil {
-				return err
-			}
-
-			i.log.Debugf("apt repo: %s", aptRepo)
-
-			if err := ioutil.WriteFile("/etc/apt/sources.list.d/salt.list", []byte(aptRepo), 0644); err != nil {
-				return err
-			}
 			runAptGetInstall = true
-		} else {
-			i.log.Debug("salt configured with apt")
 		}
 
 		if runAptGetUpdate || runAptGetInstall {
@@ -253,6 +256,20 @@ func (i *Installer) installPackage(ctx context.Context, metadata Meta) error {
 	default:
 		return fmt.Errorf("unsupported operating system: %s", metadata.OS.Vendor)
 	}
+
+	return nil
+}
+
+func (i *Installer) installPackageKey(ctx context.Context) error {
+	log := i.log.WithField("handler", "install-package-key")
+
+	log.Info("downloading saltstack package key")
+
+	if err := utils.DownloadFile(ctx, RepoKeyURL, RepoKeyFile, nil, nil); err != nil {
+		return err
+	}
+
+	log.Info("saltstack package key downloaded")
 
 	return nil
 }

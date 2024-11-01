@@ -237,7 +237,7 @@ func init() {
 		&cli.StringFlag{
 			Name:    "saltstack-install-mode",
 			Usage:   "Install Mode for Saltstack",
-			Value:   "binary",
+			Value:   "package",
 			Aliases: []string{"ssim"},
 			EnvVars: []string{"CAST_SALTSTACK_INSTALL_MODE"},
 			Hidden:  true,
