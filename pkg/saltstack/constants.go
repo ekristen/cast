@@ -1,7 +1,7 @@
 package saltstack
 
 const (
-	Version string = "3007.1" // renovate: datasource=github-releases depName=saltstack/salt
+	Version string = "3006.1" // renovate: datasource=github-releases depName=saltstack/salt
 
 	BinaryURL   string = `https://repo.saltproject.io/salt/singlebin/{{ .Version }}-1/salt-{{ .Version }}-1-linux-{{ .OS.Architecture }}.tar.gz`
 	HashURL     string = `https://repo.saltproject.io/salt/singlebin/{{ .Version }}-1/salt-{{ .Version }}-1_SHA512`
