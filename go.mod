@@ -14,7 +14,7 @@ require (
 	github.com/rancher/wrangler v0.8.6
 	github.com/sigstore/cosign/v2 v2.4.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/crypto v0.29.0
 	golang.org/x/oauth2 v0.24.0
