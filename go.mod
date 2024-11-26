@@ -7,7 +7,7 @@ toolchain go1.23.3
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/ProtonMail/gopenpgp/v2 v2.8.0
+	github.com/ProtonMail/gopenpgp/v2 v2.8.1
 	github.com/google/go-github/v66 v66.0.0
 	github.com/otiai10/copy v1.14.0
 	github.com/pkg/errors v0.9.1
@@ -25,7 +25,7 @@ require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
-	github.com/ProtonMail/go-crypto v1.1.0 // indirect
+	github.com/ProtonMail/go-crypto v1.1.3 // indirect
 	github.com/ProtonMail/go-mime v0.0.0-20230322103455-7d82a3887f2f // indirect
 	github.com/ThalesIgnite/crypto11 v1.2.5 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
