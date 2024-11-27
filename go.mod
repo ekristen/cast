@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/ProtonMail/gopenpgp/v2 v2.8.1
-	github.com/google/go-github/v66 v66.0.0
+	github.com/google/go-github/v67 v67.0.0
 	github.com/otiai10/copy v1.14.0
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/wrangler v0.8.6
