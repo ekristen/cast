@@ -26,12 +26,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
+      - name: generate-token
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
+        with:
+          app_id: ${{ secrets.EKRISTEN_DEV_APP_ID }}
+          private_key: ${{ secrets.EKRISTEN_DEV_APP_PEM }}
+          revoke: true
       - name: release
+        uses: cycjimmy/semantic-release-action@v4
         env:
-          GITHUB_TOKEN: ${{ secrets.SEMANTIC_GITHUB_TOKEN }}
-        run: |
-          npx \
-            -p @semantic-release/commit-analyzer \
-            -p @semantic-release/release-notes-generator \
-            -p @semantic-release/github \
-            semantic-release --debug
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
