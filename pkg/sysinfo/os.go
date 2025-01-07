@@ -38,6 +38,8 @@ func GetOSInfo() (osinfo *OS) {
 		osinfo.Architecture = "x86_64"
 	} else if _, err := os.Stat("/lib/ld-linux.so.2"); err == nil {
 		osinfo.Architecture = "i386"
+	} else if _, err := os.Stat("/lib/ld-linux-aarch64.so.1"); err == nil {
+		osinfo.Architecture = "arm64"
 	}
 
 	f, err := os.Open("/etc/os-release")
