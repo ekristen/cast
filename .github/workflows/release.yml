@@ -29,6 +29,12 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           fetch-depth: 0
+      - name: generate-token
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
+        with:
+          app_id: ${{ secrets.EKRISTEN_DEV_APP_ID }}
+          private_key: ${{ secrets.EKRISTEN_DEV_APP_PEM }}
       - name: setup-go
         uses: actions/setup-go@v5
         with:
@@ -92,7 +98,7 @@ jobs:
           version: latest
           args: release --clean ${{ env.GORELEASER_ARGS }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
           NFPM_GPG_KEY: "./pgp.key"
           NFPM_CAST_PASSPHRASE: ${{ secrets.NFPM_CAST_PASSPHRASE }}
       - name: push docker images (for branches)
