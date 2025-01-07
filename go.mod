@@ -9,8 +9,8 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/ProtonMail/gopenpgp/v2 v2.8.1
 	github.com/google/go-github/v66 v66.0.0
-	github.com/otiai10/copy v1.14.1
 	github.com/mholt/archives v0.1.0
+	github.com/otiai10/copy v1.14.1
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/wrangler v0.8.6
 	github.com/sigstore/cosign/v2 v2.4.1
