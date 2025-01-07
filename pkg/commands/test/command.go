@@ -1,16 +1,16 @@
 package test
 
 import (
+	"errors"
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
-
-	"github.com/urfave/cli/v2"
-
 	"github.com/ekristen/cast/pkg/commands"
 	"github.com/ekristen/cast/pkg/common"
 	"github.com/ekristen/cast/pkg/config"
+	"github.com/urfave/cli/v2"
+	"math/rand"
+	"os"
+	"os/exec"
+	"path/filepath"
 )
 
 func Execute(c *cli.Context) error {
@@ -51,9 +51,11 @@ func Execute(c *cli.Context) error {
 		basePath = filepath.Join(basePath, cfg.Manifest.Base)
 	}
 
+	name := fmt.Sprintf("cast-test-state-%s", randomString(9))
+
 	args := []string{
 		"run", "-i", "--rm",
-		`--name=cast-state`,
+		fmt.Sprintf(`--name=%s`, name),
 		fmt.Sprintf("--volume=%s:/srv/salt/%s", basePath, cfg.Manifest.Name),
 		`--cap-add=SYS_ADMIN`,
 		c.String("image"),
@@ -66,10 +68,24 @@ func Execute(c *cli.Context) error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
+		var exitError *exec.ExitError
+		if errors.As(err, &exitError) {
+			os.Exit(exitError.ExitCode())
+		}
 		return err
 	}
 
 	return nil
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+func randomString(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }
 
 func init() {
@@ -89,7 +105,7 @@ func init() {
 		},
 		&cli.StringFlag{
 			Name:  "image",
-			Value: "ghcr.io/ekristen/cast-tools/saltstack-tester:focal-3004",
+			Value: "ghcr.io/ekristen/cast-tools/saltstack-tester:jammy-3006",
 		},
 	}
 
