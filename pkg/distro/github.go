@@ -82,7 +82,8 @@ type LocalConfig struct {
 	Manifest *Manifest `yaml:"manifest"`
 }
 
-func NewGitHub(ctx context.Context, distro string, version *string, includePreReleases bool, githubToken string, data map[string]string) (Distro, error) {
+func NewGitHub(ctx context.Context, distro string, version *string,
+	skipValidation bool, includePreReleases bool, githubToken string, data map[string]string) (Distro, error) {
 	var d *GitHubDistro
 	if v, ok := aliases[distro]; ok {
 		d = v
@@ -132,7 +133,7 @@ func NewGitHub(ctx context.Context, distro string, version *string, includePreRe
 		return nil, err
 	}
 
-	if err := d.verifyRelease(); err != nil {
+	if err := d.verifyRelease(skipValidation); err != nil {
 		return nil, err
 	}
 
@@ -468,7 +469,7 @@ func (d *GitHubDistro) fetchReleases(ctx context.Context) error {
 	return nil
 }
 
-func (d *GitHubDistro) verifyRelease() error {
+func (d *GitHubDistro) verifyRelease(skipValidation bool) error {
 	for _, asset := range d.selected.Assets {
 		if *asset.Name == "manifest.yml" {
 			assetURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/assets/%d", d.Owner, d.Repo, asset.GetID())
@@ -504,47 +505,49 @@ func (d *GitHubDistro) verifyRelease() error {
 		return fmt.Errorf("unable to resolve a manifest for: %s", d.Name)
 	}
 
-	isSupported := len(d.Manifest.SupportedOS) == 0
+	if !skipValidation {
+		isSupported := len(d.Manifest.SupportedOS) == 0
 
-	if !isSupported {
-		d.log.Info("checking operating system support")
+		if !isSupported {
+			d.log.Info("checking operating system support")
+		}
+
+		osInfo := sysinfo.GetOSInfo()
+		for _, s := range d.Manifest.SupportedOS {
+			mustMatch := 0
+			match := 0
+
+			if s.ID != "" {
+				mustMatch++
+			}
+			if s.Codename != "" {
+				mustMatch++
+			}
+			if s.Release != "" {
+				mustMatch++
+			}
+
+			if s.ID != "" && strings.EqualFold(s.ID, osInfo.Vendor) {
+				match++
+			}
+			if s.Codename != "" && strings.EqualFold(s.Codename, osInfo.Codename) {
+				match++
+			}
+			if s.Release != "" && strings.EqualFold(s.Release, osInfo.Release) {
+				match++
+			}
+
+			if match == mustMatch {
+				isSupported = true
+			}
+		}
+
+		if !isSupported {
+			return fmt.Errorf("operating system is not supported")
+		}
+
+		d.log.Info("operating system is supported")
 	}
-
-	osinfo := sysinfo.GetOSInfo()
-	for _, s := range d.Manifest.SupportedOS {
-		mustmatch := 0
-		match := 0
-
-		if s.ID != "" {
-			mustmatch++
-		}
-		if s.Codename != "" {
-			mustmatch++
-		}
-		if s.Release != "" {
-			mustmatch++
-		}
-
-		if s.ID != "" && strings.EqualFold(s.ID, osinfo.Vendor) {
-			match++
-		}
-		if s.Codename != "" && strings.EqualFold(s.Codename, osinfo.Codename) {
-			match++
-		}
-		if s.Release != "" && strings.EqualFold(s.Release, osinfo.Release) {
-			match++
-		}
-
-		if match == mustmatch {
-			isSupported = true
-		}
-	}
-
-	if !isSupported {
-		return fmt.Errorf("operating system is not supported")
-	}
-
-	d.log.Info("operating system is supported")
 
 	d.log.Info("rendering manifest")
 	if err := d.Manifest.Render(d.data); err != nil {
