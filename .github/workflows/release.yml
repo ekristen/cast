@@ -81,7 +81,7 @@ jobs:
       - name: setup-quill
         uses: 1password/load-secrets-action@v2
         # Extra Safeguard - This ensures the secrets are only loaded on tag and a tag that the repo owner triggered
-        if: startsWith(github.ref, 'refs/tags/') == true && github.actor == github.repository_owner
+        if: startsWith(github.ref, 'refs/tags/') == true && (github.actor == github.repository_owner || github.actor == 'ekristen-dev[bot]')
         with:
           export-env: true
         env:
