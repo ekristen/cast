@@ -3,12 +3,14 @@ package test
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"math/rand"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
 
 	"github.com/urfave/cli/v2"
@@ -17,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/ekristen/cast/pkg/commands"
 	"github.com/ekristen/cast/pkg/common"
@@ -96,8 +99,16 @@ func Execute(c *cli.Context) error {
 	ctx, cancel := context.WithCancel(c.Context)
 	defer cancel()
 
+	platform := c.String("platform")
+	if len(strings.Split(platform, "/")) != 2 {
+		return fmt.Errorf("invalid platform format: %s", platform)
+	}
+
 	// Pull the image
-	imageOut, err := dockerClient.ImagePull(ctx, c.String("image"), image.PullOptions{})
+	logrus.Info("pulling image (if needed)")
+	imageOut, err := dockerClient.ImagePull(ctx, c.String("image"), image.PullOptions{
+		Platform: platform,
+	})
 	if err != nil {
 		return err
 	}
@@ -109,17 +120,22 @@ func Execute(c *cli.Context) error {
 		return err
 	}
 
+	logrus.Info("launching container")
 	resp, err := dockerClient.ContainerCreate(ctx, &container.Config{
 		Image: c.String("image"),
 		Cmd: []string{
-			"salt-call", "-l", "debug", "--local", "--retcode-passthrough",
+			"salt-call", "--local", "--retcode-passthrough",
+			"-l", c.String("salt-log-level"),
 			"--state-output=mixed", "state.sls", state,
 		},
 	}, &container.HostConfig{
 		AutoRemove: true,
 		CapAdd:     []string{"SYS_ADMIN"},
 		Binds:      []string{fmt.Sprintf("%s:/srv/salt/%s", basePath, cfg.Manifest.Name)},
-	}, nil, nil, name)
+	}, nil, &v1.Platform{
+		OS:           strings.Split(platform, "/")[0],
+		Architecture: strings.Split(platform, "/")[1],
+	}, name)
 	if err != nil {
 		return err
 	}
@@ -129,6 +145,7 @@ func Execute(c *cli.Context) error {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sigs
+		logrus.Info("received signal, stopping container")
 		_ = dockerClient.ContainerStop(ctx, resp.ID, container.StopOptions{})
 		os.Exit(1)
 	}()
@@ -192,6 +209,10 @@ func init() {
 		&cli.StringFlag{
 			Name:  "platform",
 			Value: fmt.Sprintf("linux/%s", runtime.GOARCH),
+		},
+		&cli.StringFlag{
+			Name:  "salt-log-level",
+			Value: "debug",
 		},
 	}
 
