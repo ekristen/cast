@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 )
 
 func Execute(c *cli.Context) error {
@@ -58,6 +59,7 @@ func Execute(c *cli.Context) error {
 		fmt.Sprintf(`--name=%s`, name),
 		fmt.Sprintf("--volume=%s:/srv/salt/%s", basePath, cfg.Manifest.Name),
 		`--cap-add=SYS_ADMIN`,
+		fmt.Sprintf("--platform=%s", c.String("platform")),
 		c.String("image"),
 		"salt-call", "-l", "debug", "--local", "--retcode-passthrough",
 		"--state-output=mixed", "state.sls", state,
@@ -105,7 +107,11 @@ func init() {
 		},
 		&cli.StringFlag{
 			Name:  "image",
-			Value: "ghcr.io/ekristen/cast-tools/saltstack-tester:jammy-3006",
+			Value: "ghcr.io/ekristen/cast-tools/saltstack-tester:24.04-3006",
+		},
+		&cli.StringFlag{
+			Name:  "platform",
+			Value: fmt.Sprintf("linux/%s", runtime.GOARCH),
 		},
 	}
 
