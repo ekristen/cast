@@ -83,7 +83,9 @@ func Execute(c *cli.Context) error {
 			return err
 		}
 	} else {
-		dist, err = distro.NewGitHub(ctx, distroName, &distroVersion, c.Bool("pre-release"), c.String("github-token"), distroData)
+		dist, err = distro.NewGitHub(ctx, distroName, &distroVersion,
+			c.Bool("no-os-check"),
+			c.Bool("pre-release"), c.String("github-token"), distroData)
 		if err != nil {
 			return err
 		}
@@ -241,6 +243,10 @@ func init() {
 			Aliases: []string{"ssim"},
 			EnvVars: []string{"CAST_SALTSTACK_INSTALL_MODE"},
 			Hidden:  true,
+		},
+		&cli.BoolFlag{
+			Name:  "no-os-check",
+			Usage: "Disable OS check",
 		},
 	}
 
