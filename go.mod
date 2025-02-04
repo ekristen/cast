@@ -2,7 +2,7 @@ module github.com/ekristen/cast
 
 go 1.22.7
 
-toolchain go1.23.5
+toolchain go1.23.6
 
 require (
 	github.com/Masterminds/semver v1.5.0
