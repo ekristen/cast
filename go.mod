@@ -11,7 +11,7 @@ require (
 	github.com/google/go-github/v66 v66.0.0
 	github.com/otiai10/copy v1.14.1
 	github.com/pkg/errors v0.9.1
-	github.com/rancher/wrangler v0.8.6
+	github.com/rancher/wrangler v0.8.11
 	github.com/sigstore/cosign/v2 v2.4.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
