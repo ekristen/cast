@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/ProtonMail/gopenpgp/v2 v2.8.3
-	github.com/google/go-github/v66 v66.0.0
+	github.com/google/go-github/v69 v69.2.0
 	github.com/otiai10/copy v1.14.1
 	github.com/pkg/errors v0.9.1
 	github.com/rancher/wrangler v0.8.6
@@ -126,7 +126,6 @@ require (
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	github.com/vbatts/tar-split v0.11.6 // indirect
-	github.com/xanzy/go-gitlab v0.109.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	gitlab.com/gitlab-org/api/client-go v0.123.0 // indirect
 	go.mongodb.org/mongo-driver v1.14.0 // indirect
