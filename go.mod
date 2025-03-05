@@ -15,7 +15,7 @@ require (
 	github.com/sigstore/cosign/v2 v2.4.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
-	github.com/urfave/cli/v2 v2.27.5
+	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/crypto v0.35.0
 	golang.org/x/oauth2 v0.27.0
 	gopkg.in/yaml.v3 v3.0.1
