@@ -35,9 +35,11 @@ func GetOSInfo() (osinfo *OS) {
 	osinfo = &OS{}
 	// This seems to be the best and most portable way to detect OS architecture (NOT kernel!)
 	if _, err := os.Stat("/lib64/ld-linux-x86-64.so.2"); err == nil {
-		osinfo.Architecture = "amd64"
+		osinfo.Architecture = "x86_64"
 	} else if _, err := os.Stat("/lib/ld-linux.so.2"); err == nil {
 		osinfo.Architecture = "i386"
+	} else if _, err := os.Stat("/lib/ld-linux-aarch64.so.1"); err == nil {
+		osinfo.Architecture = "arm64"
 	}
 
 	f, err := os.Open("/etc/os-release")
