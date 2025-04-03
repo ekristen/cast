@@ -683,9 +683,13 @@ github.com/mattn/go-runewidth v0.0.2/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzp
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
 github.com/mholt/archives v0.1.0 h1:FacgJyrjiuyomTuNA92X5GyRBRZjE43Y/lrzKIlF35Q=
 github.com/mholt/archives v0.1.0/go.mod h1:j/Ire/jm42GN7h90F5kzj6hf6ZFzEH66de+hmjEKu+I=
+github.com/mholt/archives v0.1.1 h1:c7J3qXN1FB54y0qiUXiq9Bxk4eCUc8pdXWwOhZdRzeY=
+github.com/mholt/archives v0.1.1/go.mod h1:FQVz01Q2uXKB/35CXeW/QFO23xT+hSCGZHVtha78U4I=
 github.com/miekg/pkcs11 v1.0.3-0.20190429190417-a667d056470f/go.mod h1:XsNlhZGX73bx86s2hdc/FuaLm2CPZJemRLMA+WTFxgs=
 github.com/miekg/pkcs11 v1.1.1 h1:Ugu9pdy6vAYku5DEpVWVFPYnzV+bxB+iRdbuFSu7TvU=
 github.com/miekg/pkcs11 v1.1.1/go.mod h1:XsNlhZGX73bx86s2hdc/FuaLm2CPZJemRLMA+WTFxgs=
+github.com/minio/minlz v1.0.0 h1:Kj7aJZ1//LlTP1DM8Jm7lNKvvJS2m74gyyXXn3+uJWQ=
+github.com/minio/minlz v1.0.0/go.mod h1:qT0aEB35q79LLornSzeDH75LBf3aH1MV+jB5w9Wasec=
 github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
 github.com/mitchellh/copystructure v1.2.0/go.mod h1:qLl+cE2AmVv+CoeAwDPye/v+N2HKCj9FbZEVFJRxO9s=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
@@ -725,6 +729,8 @@ github.com/nozzle/throttler v0.0.0-20180817012639-2ea982251481 h1:Up6+btDp321ZG5
 github.com/nozzle/throttler v0.0.0-20180817012639-2ea982251481/go.mod h1:yKZQO8QE2bHlgozqWDiRVqTFlLQSj30K/6SAK8EeYFw=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.4.0.20241112120701-034e449c6e78 h1:MYzLheyVx1tJVDqfu3YnN4jtnyALNzLvwl+f58TcvQY=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.4.0.20241112120701-034e449c6e78/go.mod h1:yntwv/HfMc/Hbvtq9I19D1n58te3h6KsqCf3GxyfBGY=
+github.com/nwaples/rardecode/v2 v2.1.0 h1:JQl9ZoBPDy+nIZGb1mx8+anfHp/LV3NE2MjMiv0ct/U=
+github.com/nwaples/rardecode/v2 v2.1.0/go.mod h1:7uz379lSxPe6j9nvzxUZ+n7mnJNgjsRNb6IbvGVHRmw=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
 github.com/nxadm/tail v1.4.11 h1:8feyoE3OzPrcshW5/MJ4sGESc5cqmGkGCWlco4l0bqY=
