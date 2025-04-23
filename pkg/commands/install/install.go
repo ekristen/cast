@@ -128,10 +128,7 @@ func Execute(c *cli.Context) error {
 		fileRoot = filepath.Join(distroCache.GetPath(), "source")
 	}
 
-	ssim := saltstack.Package
-	if c.String("saltstack-install-mode") != "package" {
-		return fmt.Errorf("due to changes with salt, the only install method is temporarily via package and apt")
-	}
+	ssim := saltstack.OneDir
 
 	config := &installer.Config{
 		Mode:                 installer.LocalInstallMode,
