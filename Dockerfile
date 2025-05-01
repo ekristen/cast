@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.15-labs@sha256:8378c88c56f2a6c038705487ce1e447c61c48557cd6a76aea4d53e255304260a
+# syntax=docker/dockerfile:1.15-labs@sha256:94edd5b349df43675bd6f542e2b9a24e7177432dec45fe3066bfcf2ab14c4355
 FROM cgr.dev/chainguard/wolfi-base:latest@sha256:e1d402d624011d0f4439bfb0d46a3ddc692465103c7234a326e0194953c3cfe0 AS base
 ARG PROJECT_NAME=cast
 RUN apk add --no-cache ca-certificates
