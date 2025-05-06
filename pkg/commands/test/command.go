@@ -13,7 +13,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
