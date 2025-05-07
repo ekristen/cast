@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.15-labs@sha256:94edd5b349df43675bd6f542e2b9a24e7177432dec45fe3066bfcf2ab14c4355
-FROM cgr.dev/chainguard/wolfi-base:latest@sha256:e1d402d624011d0f4439bfb0d46a3ddc692465103c7234a326e0194953c3cfe0 AS base
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:e3ce0a3bb47aefa02647e0bb6cdfb29a5a872e755660be73c9dd7b9578844258 AS base
 ARG PROJECT_NAME=cast
 RUN apk add --no-cache ca-certificates
 RUN addgroup -S ${PROJECT_NAME} && adduser -S ${PROJECT_NAME} -G ${PROJECT_NAME}
