@@ -3,7 +3,7 @@ package release
 import (
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/ekristen/cast/pkg/commands"
 	"github.com/ekristen/cast/pkg/common"
