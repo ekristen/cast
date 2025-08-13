@@ -9,7 +9,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/ProtonMail/gopenpgp/v2 v2.9.0
 	github.com/docker/docker v28.3.3+incompatible
-	github.com/google/go-github/v69 v69.2.0
+	github.com/google/go-github/v74 v74.0.0
 	github.com/mholt/archives v0.1.3
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/otiai10/copy v1.14.1
