@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "GORELEASER_ARGS=--snapshot --skip-publish" >> $GITHUB_ENV
       - name: setup-quill
-        uses: 1password/load-secrets-action@v2
+        uses: 1password/load-secrets-action@v3
         # Extra Safeguard - This ensures the secrets are only loaded on tag and a tag that the repo owner triggered
         if: startsWith(github.ref, 'refs/tags/') == true && (github.actor == github.repository_owner || github.actor == 'ekristen-dev[bot]')
         with:
