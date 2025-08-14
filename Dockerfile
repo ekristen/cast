@@ -4,7 +4,7 @@ ARG PROJECT_NAME=cast
 RUN apk add --no-cache ca-certificates
 RUN addgroup -S ${PROJECT_NAME} && adduser -S ${PROJECT_NAME} -G ${PROJECT_NAME}
 
-FROM golang:1.24 AS build
+FROM golang:1.25 AS build
 ARG PROJECT_NAME=cast
 COPY / /src
 WORKDIR /src
