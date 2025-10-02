@@ -1832,6 +1832,8 @@ github.com/sigstore/cosign/v2 v2.5.3 h1:5SzfUNTgwMDC8hq1pW0xV4zsrW56l0uvDMjCR9Yl
 github.com/sigstore/cosign/v2 v2.5.3/go.mod h1:eihZ0ZZyx7dtrwQA3UbkQLetICc2HAiJ8jnt8aMfSvI=
 github.com/sigstore/cosign/v2 v2.6.0 h1:7DYqkc8RUnoteFhbeYMWu1qkvTDgCYU2MT/2xQPvDks=
 github.com/sigstore/cosign/v2 v2.6.0/go.mod h1:/6AgUhKRfkn3aWRxdrUGyu/vBK4hGrvtZHFQoSx15D4=
+github.com/sigstore/cosign/v2 v2.6.1 h1:7Wf67ENNCjg+1fLqHRPgKUNaCCnCavnEfCe1LApOoIo=
+github.com/sigstore/cosign/v2 v2.6.1/go.mod h1:L37doL+7s6IeCXFODV2J7kds5Po/srlVzA//++YqAJ8=
 github.com/sigstore/fulcio v1.6.6 h1:XaMYX6TNT+8n7Npe8D94nyZ7/ERjEsNGFC+REdi/wzw=
 github.com/sigstore/fulcio v1.6.6/go.mod h1:BhQ22lwaebDgIxVBEYOOqLRcN5+xOV+C9bh/GUXRhOk=
 github.com/sigstore/protobuf-specs v0.4.0 h1:yoZbdh0kZYKOSiVbYyA8J3f2wLh5aUk2SQB7LgAfIdU=
@@ -1874,6 +1876,8 @@ github.com/sigstore/sigstore-go v1.1.0 h1:NBfyvL/LiBIplnIZAtC7GtDZ7qj82A/GTpn0+5
 github.com/sigstore/sigstore-go v1.1.0/go.mod h1:97lDVpZVBCTFX114KPAManEsShVe934KyaVhZGhPVBM=
 github.com/sigstore/sigstore-go v1.1.2 h1:VFfqVQvUm3m7uAiqJFK+hDSH3I2rCBYH4l3wIDy+Ozo=
 github.com/sigstore/sigstore-go v1.1.2/go.mod h1:mF7i7L6NlKYuUEnbUUxwtKQuz8BxQ7SGEqXDgnysbKc=
+github.com/sigstore/sigstore-go v1.1.3 h1:5lKcbXZa5JC7wb/UVywyCulccfYTUju1D5h4tkn+fXE=
+github.com/sigstore/sigstore-go v1.1.3/go.mod h1:3jKC4IDh7TEVtCSJCjx0lpq5YfJbDJmfp65WsMvY2mg=
 github.com/sigstore/sigstore/pkg/signature/kms/aws v1.8.15 h1:g/hPoaemFv/6ZJIRyb5I1lA4qU9PZwCTu/GkvFV5jEw=
 github.com/sigstore/sigstore/pkg/signature/kms/aws v1.8.15/go.mod h1:n2yKi/b29+JB54PyONruHvvha4zugC7jzr+A16cNLvw=
 github.com/sigstore/sigstore/pkg/signature/kms/azure v1.8.15 h1:K2GstKWXftcpmg/wHfcJFYKWuj+YRSoTgwxm3ox2FjE=
@@ -1986,6 +1990,8 @@ github.com/theupdateframework/go-tuf/v2 v2.0.2 h1:PyNnjV9BJNzN1ZE6BcWK+5JbF+if37
 github.com/theupdateframework/go-tuf/v2 v2.0.2/go.mod h1:baB22nBHeHBCeuGZcIlctNq4P61PcOdyARlplg5xmLA=
 github.com/theupdateframework/go-tuf/v2 v2.1.1 h1:OWcoHItwsGO+7m0wLa7FDWPR4oB1cj0zOr1kosE4G+I=
 github.com/theupdateframework/go-tuf/v2 v2.1.1/go.mod h1:V675cQGhZONR0OGQ8r1feO0uwtsTBYPDWHzAAPn5rjE=
+github.com/theupdateframework/go-tuf/v2 v2.2.0 h1:Hmb+Azgd7IKOZeNJFT2C91y+YZ+F+TeloSIvQIaXCQw=
+github.com/theupdateframework/go-tuf/v2 v2.2.0/go.mod h1:CubcJiJlBHQ2YkA5j9hlBO4B+tHFlLjRbWCJCT7EIKU=
 github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tink-crypto/tink-go-awskms/v2 v2.1.0 h1:N9UxlsOzu5mttdjhxkDLbzwtEecuXmlxZVo/ds7JKJI=
 github.com/tink-crypto/tink-go-awskms/v2 v2.1.0/go.mod h1:PxSp9GlOkKL9rlybW804uspnHuO9nbD98V/fDX4uSis=
