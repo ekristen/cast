@@ -7,7 +7,7 @@ toolchain go1.25.2
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/ProtonMail/gopenpgp/v2 v2.9.0
+	github.com/ProtonMail/gopenpgp/v3 v3.3.0
 	github.com/docker/docker v28.5.1+incompatible
 	github.com/google/go-github/v69 v69.2.0
 	github.com/mholt/archives v0.1.4
