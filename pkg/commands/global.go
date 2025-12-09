@@ -6,7 +6,7 @@ import (
 	"runtime"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func GlobalFlags() []cli.Flag {
