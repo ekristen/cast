@@ -14,14 +14,11 @@ import (
 
 const template = `release:
   github:
-	# Set this to the owner of the GitHub Repository
-    owner: <owner>
-	# Set this to the repository name
-    repository: <repo>
+    owner: <owner> # Set this to the owner of the GitHub Repository
+    repository: <repo> # Set this to the repository name
 manifest:
   version: 2
-  # Set this to the name of your distribution
-  name: <distro-name>
+  name: <distro-name> # Set this to the name of your distribution
   modes:
     - name: server
       state: <distro-name>.server
