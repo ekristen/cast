@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
+
+	"github.com/ekristen/cast/pkg/httputil"
 )
 
 func DownloadFile(ctx context.Context, url string, dest string, httpClient *http.Client, headers map[string]string) error {
 	if httpClient == nil {
-		httpClient = &http.Client{}
+		httpClient = httputil.NewClient()
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -45,7 +46,7 @@ func DownloadFile(ctx context.Context, url string, dest string, httpClient *http
 
 func DownloadFileToBytes(ctx context.Context, url string, httpClient *http.Client, headers map[string]string) ([]byte, error) {
 	if httpClient == nil {
-		httpClient = &http.Client{}
+		httpClient = httputil.NewClient()
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -67,5 +68,5 @@ func DownloadFileToBytes(ctx context.Context, url string, httpClient *http.Clien
 		return nil, fmt.Errorf("received error code %d attempting to download", resp.StatusCode)
 	}
 
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }
