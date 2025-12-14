@@ -1,13 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/ekristen/go-checkpoint"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/ekristen/cast/pkg/common"
 
@@ -30,10 +32,20 @@ func main() {
 
 	checkpointResult := make(chan *checkpoint.CheckResponse, 1)
 	go func() {
-		resp, err := checkpoint.Check(&checkpoint.CheckParams{
+		cacheDir, err := os.UserCacheDir()
+		if err != nil {
+			logrus.Fatalf("Error getting cache directory: %v", err)
+		}
+
+		params := &checkpoint.CheckParams{
 			Product: common.NAME,
 			Version: common.SUMMARY,
-		})
+		}
+		if cacheDir != "" {
+			params.CacheFile = filepath.Join(cacheDir, "cast", "checkpoint")
+		}
+
+		resp, err := checkpoint.Check(params)
 		if err != nil {
 			logrus.WithError(err).Debug("checkpoint check failed")
 			checkpointResult <- nil
@@ -42,23 +54,17 @@ func main() {
 		checkpointResult <- resp
 	}()
 
-	app := cli.NewApp()
-	app.Name = path.Base(os.Args[0])
-	app.Usage = common.AppVersion.Name
-	app.Version = common.AppVersion.Summary
-	app.Authors = []*cli.Author{
-		{
-			Name:  "Erik Kristensen",
-			Email: "erik@erikkristensen.com",
+	cmd := &cli.Command{
+		Name:    path.Base(os.Args[0]),
+		Usage:   common.AppVersion.Name,
+		Version: common.AppVersion.Summary,
+		Authors: []any{
+			"Erik Kristensen <erik@erikkristensen.com>",
 		},
+		Commands: common.GetCommands(),
 	}
 
-	app.Commands = common.GetCommands()
-	app.CommandNotFound = func(context *cli.Context, command string) {
-		logrus.Fatalf("Command %s not found.", command)
-	}
-
-	if err := app.Run(os.Args); err != nil {
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		logrus.Fatal(err)
 	}
 
