@@ -1,15 +1,17 @@
 package common
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var commands []*cli.Command
 
 // Commander --
 type Commander interface {
-	Execute(c *cli.Context)
+	Execute(ctx context.Context, c *cli.Command)
 }
 
 // RegisterCommand --

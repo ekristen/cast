@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"io"
 	"math/rand"
 	"os"
@@ -13,7 +12,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/urfave/cli/v2"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v3"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
@@ -26,17 +26,17 @@ import (
 	"github.com/ekristen/cast/pkg/config"
 )
 
-func Execute(c *cli.Context) error {
-	if c.Args().Len() != 1 {
+func Execute(ctx context.Context, cmd *cli.Command) error {
+	if cmd.Args().Len() != 1 {
 		return fmt.Errorf("expect a single argument")
 	}
 
-	if c.Path("dir") != "" {
+	if cmd.String("dir") != "" {
 		cwd, err := os.Getwd()
 		if err != nil {
 			return err
 		}
-		if err := os.Chdir(c.Path("dir")); err != nil {
+		if err := os.Chdir(cmd.String("dir")); err != nil {
 			return err
 		}
 		defer func(dir string) {
@@ -44,9 +44,9 @@ func Execute(c *cli.Context) error {
 		}(cwd)
 	}
 
-	state := c.Args().First()
+	state := cmd.Args().First()
 
-	cfg, err := config.Load(c.Path("config"))
+	cfg, err := config.Load(cmd.String("config"))
 	if err != nil {
 		return err
 	}
@@ -72,17 +72,17 @@ func Execute(c *cli.Context) error {
 			fmt.Sprintf(`--name=%s`, name),
 			fmt.Sprintf("--volume=%s:/srv/salt/%s", basePath, cfg.Manifest.Name),
 			`--cap-add=SYS_ADMIN`,
-			fmt.Sprintf("--platform=%s", c.String("platform")),
-			c.String("image"),
+			fmt.Sprintf("--platform=%s", cmd.String("platform")),
+			cmd.String("image"),
 			"salt-call", "-l", "debug", "--local", "--retcode-passthrough",
 			"--state-output=mixed", "state.sls", state,
 		}
 
-		cmd := exec.CommandContext(c.Context, "docker", args...)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
+		execCmd := exec.CommandContext(ctx, "docker", args...)
+		execCmd.Stdout = os.Stdout
+		execCmd.Stderr = os.Stderr
 
-		if err := cmd.Run(); err != nil {
+		if err := execCmd.Run(); err != nil {
 			var exitError *exec.ExitError
 			if errors.As(err, &exitError) {
 				os.Exit(exitError.ExitCode())
@@ -96,17 +96,17 @@ func Execute(c *cli.Context) error {
 		return err
 	}
 
-	ctx, cancel := context.WithCancel(c.Context)
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	platform := c.String("platform")
+	platform := cmd.String("platform")
 	if len(strings.Split(platform, "/")) != 2 {
 		return fmt.Errorf("invalid platform format: %s", platform)
 	}
 
 	// Pull the image
 	logrus.Info("pulling image (if needed)")
-	imageOut, err := dockerClient.ImagePull(ctx, c.String("image"), image.PullOptions{
+	imageOut, err := dockerClient.ImagePull(ctx, cmd.String("image"), image.PullOptions{
 		Platform: platform,
 	})
 	if err != nil {
@@ -122,10 +122,10 @@ func Execute(c *cli.Context) error {
 
 	logrus.Info("launching container")
 	resp, err := dockerClient.ContainerCreate(ctx, &container.Config{
-		Image: c.String("image"),
+		Image: cmd.String("image"),
 		Cmd: []string{
 			"salt-call", "--local", "--retcode-passthrough",
-			"-l", c.String("salt-log-level"),
+			"-l", cmd.String("salt-log-level"),
 			"--state-output=mixed", "state.sls", state,
 		},
 	}, &container.HostConfig{
@@ -189,18 +189,18 @@ func randomString(length int) string {
 
 func init() {
 	flags := []cli.Flag{
-		&cli.PathFlag{
+		&cli.StringFlag{
 			Name:  "config",
 			Value: ".cast.yml",
 		},
-		&cli.PathFlag{
+		&cli.StringFlag{
 			Name:   "dir",
 			Hidden: true,
 		},
 		&cli.StringFlag{
 			Name:    "user",
 			Usage:   "The user to install against (cannot be root)",
-			EnvVars: []string{"SUDO_USER"},
+			Sources: cli.EnvVars("SUDO_USER"),
 		},
 		&cli.StringFlag{
 			Name:  "image",
