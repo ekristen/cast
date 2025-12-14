@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"github.com/ekristen/cast/pkg/common"
+	"github.com/ekristen/cast/pkg/httputil"
 
 	_ "github.com/ekristen/cast/pkg/commands/init"
 	_ "github.com/ekristen/cast/pkg/commands/install"
@@ -38,8 +39,9 @@ func main() {
 		}
 
 		params := &checkpoint.CheckParams{
-			Product: common.NAME,
-			Version: common.SUMMARY,
+			Product:    common.NAME,
+			Version:    common.SUMMARY,
+			HTTPClient: httputil.NewClient(),
 		}
 		if cacheDir != "" {
 			params.CacheFile = filepath.Join(cacheDir, "cast", "checkpoint")
