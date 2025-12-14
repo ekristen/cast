@@ -8,4 +8,6 @@ type Distro interface {
 	GetCacheSaltStackSourcePath() string
 	GetSaltstackPillars() (pillars map[string]string)
 	Download(dir string) error
+	GetSuccessMessage() string
+	GetFailureMessage() string
 }

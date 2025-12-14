@@ -21,6 +21,7 @@ import (
 	"github.com/ekristen/cast/pkg/cosign"
 
 	"github.com/ekristen/cast/pkg/common"
+	"github.com/ekristen/cast/pkg/httputil"
 	"github.com/ekristen/cast/pkg/sysinfo"
 	"github.com/ekristen/cast/pkg/utils"
 
@@ -124,7 +125,9 @@ func NewGitHub(ctx context.Context, distro string, version *string,
 		}
 	} else {
 		logrus.Warn("using unauthenticated github client, could result in API rate limiting")
-		d.github = github.NewClient(nil)
+		d.http = httputil.NewClient()
+		d.github = github.NewClient(d.http)
+		d.dlHttp = httputil.NewClient()
 	}
 
 	d.log = logrus.WithField("component", "distro").WithField("owner", d.Owner).WithField("repo", d.Repo)
@@ -188,6 +191,20 @@ func (d *GitHubDistro) GetCacheSaltStackSourcePath() string {
 	fileRootPath := filepath.Join("source", d.Manifest.Name)
 	d.log.Debugf("salstack file root path: %s", fileRootPath)
 	return fileRootPath
+}
+
+func (d *GitHubDistro) GetSuccessMessage() string {
+	if d.Manifest != nil {
+		return d.Manifest.SuccessMessage
+	}
+	return ""
+}
+
+func (d *GitHubDistro) GetFailureMessage() string {
+	if d.Manifest != nil {
+		return d.Manifest.FailureMessage
+	}
+	return ""
 }
 
 func (d *GitHubDistro) Download(dir string) error {
@@ -759,7 +776,7 @@ func (d *GitHubDistro) validatePGPSignature(dir, filename, checksumFilename stri
 
 func (d *GitHubDistro) downloadFile(url string, dir string, httpClient *http.Client, headers map[string]string) error {
 	if httpClient == nil {
-		httpClient = &http.Client{}
+		httpClient = httputil.NewClient()
 	}
 
 	req, err := http.NewRequestWithContext(d.ctx, "GET", url, nil)

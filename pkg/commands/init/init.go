@@ -1,12 +1,12 @@
 package release
 
 import (
+	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/ekristen/cast/pkg/commands"
 	"github.com/ekristen/cast/pkg/common"
@@ -16,7 +16,7 @@ const template = `release:
   github:
 	# Set this to the owner of the GitHub Repository
     owner: <owner>
-	# Set this to the repository name 
+	# Set this to the repository name
     repository: <repo>
 manifest:
   version: 2
@@ -32,12 +32,12 @@ manifest:
       codename: focal
 `
 
-func Execute(c *cli.Context) error {
+func Execute(ctx context.Context, cmd *cli.Command) error {
 	if _, err := os.Stat(".cast.yml"); !os.IsNotExist(err) {
 		return fmt.Errorf("file .cast.yml already exists")
 	}
 
-	if err := ioutil.WriteFile(".cast.yml", []byte(template), 0644); err != nil {
+	if err := os.WriteFile(".cast.yml", []byte(template), 0644); err != nil {
 		return err
 	}
 
