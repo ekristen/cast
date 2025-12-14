@@ -3,13 +3,15 @@ package installer
 import (
 	"errors"
 	"io"
-	"net/http"
 	"os"
+
+	"github.com/ekristen/cast/pkg/httputil"
 )
 
 func DownloadFile(url string, dest string) error {
-	// Get the data
-	resp, err := http.Get(url)
+	// Get the data using a proxy-aware client
+	client := httputil.NewClient()
+	resp, err := client.Get(url)
 	if err != nil {
 		return err
 	}

@@ -18,6 +18,7 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/ekristen/cast/pkg/config"
 	"github.com/ekristen/cast/pkg/git"
+	"github.com/ekristen/cast/pkg/httputil"
 	"github.com/ekristen/cast/pkg/utils"
 	"github.com/google/go-github/v69/github"
 	"github.com/pkg/errors"
@@ -400,7 +401,7 @@ func signFile(ctx context.Context, file string) error {
 
 func downloadFile(url string, dest string, httpClient *http.Client, headers map[string]string) (string, error) {
 	if httpClient == nil {
-		httpClient = &http.Client{}
+		httpClient = httputil.NewClient()
 	}
 
 	req, err := http.NewRequest("GET", url, nil)
