@@ -18,12 +18,14 @@ func ParseManifest(contents []byte) (m *Manifest, err error) {
 }
 
 type Manifest struct {
-	Version     int           `json:"version" yaml:"version" default:"2"`
-	Name        string        `json:"name,omitempty" yaml:"name,omitempty"`
-	Base        string        `json:"base_dir" yaml:"base_dir" default:"."`
-	Modes       []Mode        `json:"modes" yaml:"modes"`
-	Saltstack   Saltstack     `json:"saltstack,omitempty" yaml:"saltstack,omitempty"`
-	SupportedOS []SupportedOS `json:"supported_os,omitempty" yaml:"supported_os,omitempty"`
+	Version        int           `json:"version" yaml:"version" default:"2"`
+	Name           string        `json:"name,omitempty" yaml:"name,omitempty"`
+	Base           string        `json:"base_dir" yaml:"base_dir" default:"."`
+	Modes          []Mode        `json:"modes" yaml:"modes"`
+	Saltstack      Saltstack     `json:"saltstack,omitempty" yaml:"saltstack,omitempty"`
+	SupportedOS    []SupportedOS `json:"supported_os,omitempty" yaml:"supported_os,omitempty"`
+	SuccessMessage string        `json:"success_message,omitempty" yaml:"success_message,omitempty"`
+	FailureMessage string        `json:"failure_message,omitempty" yaml:"failure_message,omitempty"`
 }
 
 type Mode struct {

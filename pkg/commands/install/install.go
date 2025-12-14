@@ -18,6 +18,7 @@ import (
 	"github.com/ekristen/cast/pkg/distro"
 	"github.com/ekristen/cast/pkg/installer"
 	"github.com/ekristen/cast/pkg/saltstack"
+	"github.com/ekristen/cast/pkg/state"
 )
 
 func Execute(ctx context.Context, cmd *cli.Command) error {
@@ -60,6 +61,16 @@ func Execute(ctx context.Context, cmd *cli.Command) error {
 		distroName = distroParts[0]
 		distroVersion = distroParts[1]
 	}
+
+	// Load saved installation state
+	savedState, err := state.Load()
+	if err != nil {
+		log.WithError(err).Debug("failed to load saved state, continuing without it")
+		savedState = &state.State{Installations: make(map[string]state.InstallState)}
+	}
+
+	// Use distroName as the key for state lookup
+	distroKey := distroName
 
 	distroData := map[string]string{
 		"User": cmd.String("user"),
@@ -112,16 +123,25 @@ func Execute(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	state := cmd.String("saltstack-state")
-	if state == "" {
-		mode := cmd.String("mode")
+	saltState := cmd.String("saltstack-state")
+	mode := cmd.String("mode")
+
+	// Check if --mode was explicitly provided; if not, try to use saved mode
+	if !cmd.IsSet("mode") {
+		if saved, ok := savedState.GetInstallState(distroKey); ok && saved.Mode != "" {
+			mode = saved.Mode
+			log.Infof("using saved mode from previous installation: %s", mode)
+		}
+	}
+
+	if saltState == "" {
 		log.Infof("installing using mode: %s", mode)
-		state, err = dist.GetModeState(mode)
+		saltState, err = dist.GetModeState(mode)
 		if err != nil {
 			return err
 		}
 	} else {
-		log.Infof("installing using state: %s", state)
+		log.Infof("installing using state: %s", saltState)
 	}
 
 	fileRoot := cmd.String("saltstack-file-root")
@@ -139,7 +159,7 @@ func Execute(ctx context.Context, cmd *cli.Command) error {
 		CachePath:            installerCache.GetPath(),
 		NoRootCheck:          cmd.Bool("no-root-check"),
 		SaltStackUser:        cmd.String("user"),
-		SaltStackState:       state,
+		SaltStackState:       saltState,
 		SaltStackTest:        cmd.Bool("saltstack-test"),
 		SaltStackFileRoot:    fileRoot,
 		SaltStackLogLevel:    cmd.String("saltstack-log-level"),
@@ -150,7 +170,28 @@ func Execute(ctx context.Context, cmd *cli.Command) error {
 	instance := installer.New(ctx, config)
 
 	if err := instance.Run(); err != nil {
+		// Display failure message if defined
+		if msg := dist.GetFailureMessage(); msg != "" {
+			fmt.Println()
+			fmt.Println(msg)
+		}
 		return err
+	}
+
+	// Save installation state after successful install
+	savedState.SetInstallState(distroKey, state.InstallState{
+		DistroName: distroName,
+		Version:    distroVersion,
+		Mode:       mode,
+	})
+	if err := savedState.Save(); err != nil {
+		log.WithError(err).Warn("failed to save installation state")
+	}
+
+	// Display success message if defined
+	if msg := dist.GetSuccessMessage(); msg != "" {
+		fmt.Println()
+		fmt.Println(msg)
 	}
 
 	return nil

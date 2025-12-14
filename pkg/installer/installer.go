@@ -333,7 +333,7 @@ func (i *Installer) runSaltstack() error {
 	if _, err := logFile.Write(out.Bytes()); err != nil {
 		i.log.WithError(err).Error("unable to write to log file")
 	}
-	if err := ioutil.WriteFile(i.outFile, out.Bytes(), 0640); err != nil {
+	if err := ioutil.WriteFile(i.outFile, out.Bytes(), 0644); err != nil {
 		i.log.WithError(err).Error("unable to write to out file")
 	}
 

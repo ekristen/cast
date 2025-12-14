@@ -110,6 +110,20 @@ func (d *LocalDistro) GetCacheSaltStackSourcePath() string {
 	return fileRootPath
 }
 
+func (d *LocalDistro) GetSuccessMessage() string {
+	if d.Manifest != nil {
+		return d.Manifest.SuccessMessage
+	}
+	return ""
+}
+
+func (d *LocalDistro) GetFailureMessage() string {
+	if d.Manifest != nil {
+		return d.Manifest.FailureMessage
+	}
+	return ""
+}
+
 func (d *LocalDistro) Download(dir string) error {
 	saltstackFileRootPath := filepath.Join(dir, d.GetCacheSaltStackSourcePath())
 	if err := os.MkdirAll(saltstackFileRootPath, 0755); err != nil {
