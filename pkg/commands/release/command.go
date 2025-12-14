@@ -1,40 +1,41 @@
 package release
 
 import (
+	"context"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/ekristen/cast/pkg/commands"
 	"github.com/ekristen/cast/pkg/common"
 	"github.com/ekristen/cast/pkg/release"
 )
 
-func Execute(c *cli.Context) error {
-	if c.Path("dir") != "" {
+func Execute(ctx context.Context, cmd *cli.Command) error {
+	if cmd.String("dir") != "" {
 		cwd, err := os.Getwd()
 		if err != nil {
 			return err
 		}
-		if err := os.Chdir(c.Path("dir")); err != nil {
+		if err := os.Chdir(cmd.String("dir")); err != nil {
 			return err
 		}
 		defer os.Chdir(cwd)
 	}
 
 	config := &release.RunConfig{
-		DistDir:      c.Path("dist"),
-		RmDist:       c.Bool("rm-dist"),
-		ConfigFile:   c.Path("config"),
-		GitHubToken:  c.String("github-token"),
-		Tag:          c.String("tag"),
-		CosignKey:    c.Path("cosign-key"),
-		LegacySign:   c.Bool("legacy-pgp-sign"),
-		LegacyPGPKey: c.Path("legacy-pgp-key"),
-		DryRun:       c.Bool("dry-run"),
+		DistDir:      cmd.String("dist"),
+		RmDist:       cmd.Bool("rm-dist"),
+		ConfigFile:   cmd.String("config"),
+		GitHubToken:  cmd.String("github-token"),
+		Tag:          cmd.String("tag"),
+		CosignKey:    cmd.String("cosign-key"),
+		LegacySign:   cmd.Bool("legacy-pgp-sign"),
+		LegacyPGPKey: cmd.String("legacy-pgp-key"),
+		DryRun:       cmd.Bool("dry-run"),
 	}
 
-	if err := release.Run(c.Context, config); err != nil {
+	if err := release.Run(ctx, config); err != nil {
 		return err
 	}
 
@@ -43,26 +44,26 @@ func Execute(c *cli.Context) error {
 
 func init() {
 	flags := []cli.Flag{
-		&cli.PathFlag{
+		&cli.StringFlag{
 			Name:  "dist",
 			Value: "dist",
 		},
-		&cli.PathFlag{
+		&cli.StringFlag{
 			Name:  "config",
 			Value: ".cast.yml",
 		},
 		&cli.StringFlag{
 			Name:    "github-token",
-			EnvVars: []string{"GITHUB_TOKEN"},
+			Sources: cli.EnvVars("GITHUB_TOKEN"),
 		},
-		&cli.PathFlag{
+		&cli.StringFlag{
 			Name:  "cosign-key",
 			Value: "cosign.key",
 		},
 		&cli.BoolFlag{
 			Name: "legacy-pgp-sign",
 		},
-		&cli.PathFlag{
+		&cli.StringFlag{
 			Name:  "legacy-pgp-key",
 			Value: "pgp.key",
 		},
@@ -76,7 +77,7 @@ func init() {
 			Name:   "tag",
 			Hidden: true,
 		},
-		&cli.PathFlag{
+		&cli.StringFlag{
 			Name:   "dir",
 			Hidden: true,
 		},

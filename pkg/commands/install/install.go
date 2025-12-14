@@ -1,6 +1,7 @@
 package install
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,7 +10,7 @@ import (
 
 	"github.com/rancher/wrangler/pkg/signals"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/ekristen/cast/pkg/cache"
 	"github.com/ekristen/cast/pkg/commands"
@@ -19,22 +20,22 @@ import (
 	"github.com/ekristen/cast/pkg/saltstack"
 )
 
-func Execute(c *cli.Context) error {
+func Execute(ctx context.Context, cmd *cli.Command) error {
 	if runtime.GOOS != "linux" {
 		return fmt.Errorf("install does not support this operating system (%s) at this time", runtime.GOOS)
 	}
 
-	ctx := signals.SetupSignalHandler(c.Context)
+	ctx = signals.SetupSignalHandler(ctx)
 
 	log := logrus.WithField("command", "install")
 
-	if c.Args().Len() != 1 {
+	if cmd.Args().Len() != 1 {
 		return fmt.Errorf("please provide a distro alias to install")
 	}
 
-	cachePath := c.Path("cache-path")
-	if c.Bool("dev") {
-		cachePath = filepath.Join(os.TempDir(), c.Path("cache-path"))
+	cachePath := cmd.String("cache-path")
+	if cmd.Bool("dev") {
+		cachePath = filepath.Join(os.TempDir(), cmd.String("cache-path"))
 	}
 
 	cache, err := cache.New(cachePath)
@@ -43,7 +44,7 @@ func Execute(c *cli.Context) error {
 	}
 
 	isLocal := false
-	distroName := c.Args().First()
+	distroName := cmd.Args().First()
 
 	if _, err := os.Stat(distroName); !os.IsNotExist(err) {
 		isLocal = true
@@ -61,10 +62,10 @@ func Execute(c *cli.Context) error {
 	}
 
 	distroData := map[string]string{
-		"User": c.String("user"),
+		"User": cmd.String("user"),
 	}
 
-	pillars := c.StringSlice("variable")
+	pillars := cmd.StringSlice("variable")
 	for _, p := range pillars {
 		parts := strings.Split(p, "=")
 		if len(parts) != 2 {
@@ -78,14 +79,14 @@ func Execute(c *cli.Context) error {
 	if isLocal {
 		log.WithField("name", distroName).WithField("version", distroVersion).Debug("detected distro information")
 
-		dist, err = distro.NewLocal(ctx, distroName, &distroVersion, c.Bool("pre-release"), c.String("github-token"), distroData)
+		dist, err = distro.NewLocal(ctx, distroName, &distroVersion, cmd.Bool("pre-release"), cmd.String("github-token"), distroData)
 		if err != nil {
 			return err
 		}
 	} else {
 		dist, err = distro.NewGitHub(ctx, distroName, &distroVersion,
-			c.Bool("no-os-check"),
-			c.Bool("pre-release"), c.String("github-token"), distroData)
+			cmd.Bool("no-os-check"),
+			cmd.Bool("pre-release"), cmd.String("github-token"), distroData)
 		if err != nil {
 			return err
 		}
@@ -111,9 +112,9 @@ func Execute(c *cli.Context) error {
 		return err
 	}
 
-	state := c.String("saltstack-state")
+	state := cmd.String("saltstack-state")
 	if state == "" {
-		mode := c.String("mode")
+		mode := cmd.String("mode")
 		log.Infof("installing using mode: %s", mode)
 		state, err = dist.GetModeState(mode)
 		if err != nil {
@@ -123,25 +124,25 @@ func Execute(c *cli.Context) error {
 		log.Infof("installing using state: %s", state)
 	}
 
-	fileRoot := c.Path("saltstack-file-root")
+	fileRoot := cmd.String("saltstack-file-root")
 	if fileRoot == "" {
 		fileRoot = filepath.Join(distroCache.GetPath(), "source")
 	}
 
 	ssim := saltstack.Package
-	if c.String("saltstack-install-mode") != "package" {
+	if cmd.String("saltstack-install-mode") != "package" {
 		return fmt.Errorf("due to changes with salt, the only install method is temporarily via package and apt")
 	}
 
 	config := &installer.Config{
 		Mode:                 installer.LocalInstallMode,
 		CachePath:            installerCache.GetPath(),
-		NoRootCheck:          c.Bool("no-root-check"),
-		SaltStackUser:        c.String("user"),
+		NoRootCheck:          cmd.Bool("no-root-check"),
+		SaltStackUser:        cmd.String("user"),
 		SaltStackState:       state,
-		SaltStackTest:        c.Bool("saltstack-test"),
+		SaltStackTest:        cmd.Bool("saltstack-test"),
 		SaltStackFileRoot:    fileRoot,
-		SaltStackLogLevel:    c.String("saltstack-log-level"),
+		SaltStackLogLevel:    cmd.String("saltstack-log-level"),
 		SaltStackPillars:     dist.GetSaltstackPillars(),
 		SaltStackInstallMode: ssim,
 	}
@@ -160,7 +161,7 @@ func init() {
 		&cli.StringFlag{
 			Name:    "github-token",
 			Usage:   "Used to authenticate to the GitHub API",
-			EnvVars: []string{"GITHUB_TOKEN", "CAST_GITHUB_TOKEN"},
+			Sources: cli.EnvVars("GITHUB_TOKEN", "CAST_GITHUB_TOKEN"),
 		},
 		&cli.BoolFlag{
 			Name:  "pre-release",
@@ -170,62 +171,62 @@ func init() {
 			Name:    "mode",
 			Usage:   "If the distro supports a mode, you can specify it for install",
 			Value:   "default",
-			EnvVars: []string{"CAST_MODE"},
+			Sources: cli.EnvVars("CAST_MODE"),
 		},
 		&cli.StringFlag{
 			Name:    "user",
 			Usage:   "The user to install against (cannot be root)",
-			EnvVars: []string{"SUDO_USER", "CAST_SUDO_USER"},
+			Sources: cli.EnvVars("SUDO_USER", "CAST_SUDO_USER"),
 		},
-		&cli.PathFlag{
+		&cli.StringFlag{
 			Name:    "cache-path",
 			Usage:   "The path where the tool caches files",
 			Value:   "/var/cache/cast",
-			EnvVars: []string{"CAST_CACHE_PATH"},
+			Sources: cli.EnvVars("CAST_CACHE_PATH"),
 		},
 		&cli.BoolFlag{
 			Name:    "no-cache",
 			Usage:   "Do not use any cached files",
-			EnvVars: []string{"CAST_NO_CACHE"},
+			Sources: cli.EnvVars("CAST_NO_CACHE"),
 		},
 		&cli.StringSliceFlag{
 			Name:    "variable",
 			Usage:   "Variable to be made available for saltstack pillar templates",
 			Aliases: []string{"var"},
-			EnvVars: []string{"CAST_VARIABLE"},
+			Sources: cli.EnvVars("CAST_VARIABLE"),
 		},
 		// Hidden Flags
 		&cli.BoolFlag{
 			Name:    "dev",
 			Usage:   "(dev) Enable Development Mode",
-			EnvVars: []string{"CAST_DEVELOPMENT_MODE"},
+			Sources: cli.EnvVars("CAST_DEVELOPMENT_MODE"),
 			Hidden:  true,
 		},
 		&cli.BoolFlag{
 			Name:    "no-root-check",
 			Usage:   "(dev) disable checking if user is root",
-			EnvVars: []string{"CAST_NO_ROOT_CHECK"},
+			Sources: cli.EnvVars("CAST_NO_ROOT_CHECK"),
 			Hidden:  true,
 		},
 		&cli.BoolFlag{
 			Name:    "saltstack-test",
 			Usage:   "Enable SaltStack Test Mode",
 			Aliases: []string{"st"},
-			EnvVars: []string{"CAST_SALTSTACK_TEST"},
+			Sources: cli.EnvVars("CAST_SALTSTACK_TEST"),
 			Hidden:  true,
 		},
 		&cli.StringFlag{
 			Name:    "saltstack-state",
 			Usage:   "Specific SaltStack State to use as entrypoint",
 			Aliases: []string{"ss"},
-			EnvVars: []string{"CAST_SALTSTACK_STATE"},
+			Sources: cli.EnvVars("CAST_SALTSTACK_STATE"),
 			Hidden:  true,
 		},
 		&cli.StringFlag{
 			Name:    "saltstack-file-root",
 			Usage:   "Use a specific directory for the file root for SaltStack",
 			Aliases: []string{"ssfr"},
-			EnvVars: []string{"CAST_SALTSTACK_FILE_ROOT"},
+			Sources: cli.EnvVars("CAST_SALTSTACK_FILE_ROOT"),
 			Hidden:  true,
 		},
 		&cli.StringFlag{
@@ -233,7 +234,7 @@ func init() {
 			Usage:   "Log level for Saltstack",
 			Value:   "info",
 			Aliases: []string{"ssll"},
-			EnvVars: []string{"CAST_SALTSTACK_LOG_LEVEL"},
+			Sources: cli.EnvVars("CAST_SALTSTACK_LOG_LEVEL"),
 			Hidden:  true,
 		},
 		&cli.StringFlag{
@@ -241,7 +242,7 @@ func init() {
 			Usage:   "Install Mode for Saltstack",
 			Value:   "package",
 			Aliases: []string{"ssim"},
-			EnvVars: []string{"CAST_SALTSTACK_INSTALL_MODE"},
+			Sources: cli.EnvVars("CAST_SALTSTACK_INSTALL_MODE"),
 			Hidden:  true,
 		},
 		&cli.BoolFlag{

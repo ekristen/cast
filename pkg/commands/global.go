@@ -1,12 +1,13 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"path"
 	"runtime"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func GlobalFlags() []cli.Flag {
@@ -15,7 +16,7 @@ func GlobalFlags() []cli.Flag {
 			Name:    "log-level",
 			Usage:   "Log Level",
 			Aliases: []string{"l"},
-			EnvVars: []string{"LOGLEVEL"},
+			Sources: cli.EnvVars("LOGLEVEL"),
 			Value:   "info",
 		},
 		&cli.BoolFlag{
@@ -35,12 +36,12 @@ func GlobalFlags() []cli.Flag {
 	return globalFlags
 }
 
-func GlobalBefore(c *cli.Context) error {
+func GlobalBefore(ctx context.Context, cmd *cli.Command) (context.Context, error) {
 	formatter := &logrus.TextFormatter{
-		DisableColors: c.Bool("log-disable-color"),
-		FullTimestamp: c.Bool("log-full-timestamp"),
+		DisableColors: cmd.Bool("log-disable-color"),
+		FullTimestamp: cmd.Bool("log-full-timestamp"),
 	}
-	if c.Bool("log-caller") {
+	if cmd.Bool("log-caller") {
 		logrus.SetReportCaller(true)
 
 		formatter.CallerPrettyfier = func(f *runtime.Frame) (string, string) {
@@ -50,7 +51,7 @@ func GlobalBefore(c *cli.Context) error {
 
 	logrus.SetFormatter(formatter)
 
-	switch c.String("log-level") {
+	switch cmd.String("log-level") {
 	case "trace":
 		logrus.SetLevel(logrus.TraceLevel)
 	case "debug":
@@ -63,5 +64,5 @@ func GlobalBefore(c *cli.Context) error {
 		logrus.SetLevel(logrus.ErrorLevel)
 	}
 
-	return nil
+	return ctx, nil
 }
