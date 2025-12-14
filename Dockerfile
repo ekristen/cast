@@ -18,7 +18,7 @@ ARG PROJECT_NAME=cast
 COPY ${PROJECT_NAME} /usr/local/bin/${PROJECT_NAME}
 USER ${PROJECT_NAME}
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 ARG PROJECT_NAME=cast
 RUN apt-get update && apt-get install -y ca-certificates
 COPY --from=build /src/bin/${PROJECT_NAME} /usr/local/bin/${PROJECT_NAME}
