@@ -193,6 +193,20 @@ func (d *GitHubDistro) GetCacheSaltStackSourcePath() string {
 	return fileRootPath
 }
 
+func (d *GitHubDistro) GetSuccessMessage() string {
+	if d.Manifest != nil {
+		return d.Manifest.SuccessMessage
+	}
+	return ""
+}
+
+func (d *GitHubDistro) GetFailureMessage() string {
+	if d.Manifest != nil {
+		return d.Manifest.FailureMessage
+	}
+	return ""
+}
+
 func (d *GitHubDistro) Download(dir string) error {
 	if err := d.downloadAssets(dir); err != nil {
 		return err

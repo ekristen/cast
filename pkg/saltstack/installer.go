@@ -126,6 +126,15 @@ func (i *Installer) installOneDir(ctx context.Context, metadata Meta) error {
 
 	tarFile := filepath.Join(i.Config.Path, "salt.tar.xz")
 	hashFile := filepath.Join(i.Config.Path, "salt.tar.xz.sha256")
+	saltDir := filepath.Join(i.Config.Path, "salt")
+
+	// Check if salt directory already exists (already extracted)
+	if exists, err := utils.FileExists(saltDir); err != nil {
+		return err
+	} else if exists {
+		log.Info("salt directory already exists, skipping installation")
+		return nil
+	}
 
 	log.Info("downloading tar.gz file")
 	onedirURL, err := metadata.Render(OneDirURL)
