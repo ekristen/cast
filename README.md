@@ -39,6 +39,12 @@ short term solution until the older install methods have fallen off.
 **Note:** there are only two aliases currently supported, `sift` and `remnux` which are resolved to
 `teamdfir/sift-saltstack` and `remnux/salt-states` respectively.
 
+## Telemetry
+
+As of 1.0.0, this tool uses [go-checkpoint](https://github.com/ekristen/go-checkpoint) which is a fork of Hashicorps checkpoint library. This allows
+the tool to notify of new versions, security alerts and we can track metrics of which versions of the tool are in use. You can disable
+with `export CHECKPOINT_DISABLE=1`. 
+
 ## What is a Cast Distribution?
 
 Simply put a cast distro is one published by the cast binary. The underlying technology used for installing the distro
