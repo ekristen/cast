@@ -1,5 +1,13 @@
 # Cast
 
+![GitHub License](https://img.shields.io/github/license/ekristen/cast)
+[![Known Vulnerabilities](https://snyk.io/test/github/ekristen/cast/badge.svg)](https://snyk.io/test/github/ekristen/cast)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ekristen/cast)](https://goreportcard.com/report/github.com/ekristen/cast)
+![GitHub Release](https://img.shields.io/github/v/release/ekristen/cast?include_prereleases)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/ekristen/cast/total)
+
+## Overview
+
 Cast is a command line utility that abstracts away [SaltStack](https://saltproject.io) for compatible configurations.
 
 It is the successor to the [SIFT CLI](https://github.com/teamdfir/sift-cli) but made in such a way that it is no longer specific to [SIFT](https://github.com/teamdfir/sift).
