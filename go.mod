@@ -10,7 +10,7 @@ require (
 	github.com/ProtonMail/gopenpgp/v2 v2.9.0
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/ekristen/go-checkpoint v0.0.0-20251214165753-5912ae8f4d4a
-	github.com/google/go-github/v80 v80.0.0
+	github.com/google/go-github/v81 v81.0.0
 	github.com/mholt/archives v0.1.5
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/otiai10/copy v1.14.1
