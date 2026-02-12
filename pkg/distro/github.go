@@ -25,7 +25,7 @@ import (
 	"github.com/ekristen/cast/pkg/sysinfo"
 	"github.com/ekristen/cast/pkg/utils"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v82/github"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 
