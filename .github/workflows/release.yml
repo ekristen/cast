@@ -91,7 +91,7 @@ jobs:
           NFPM_CAST_PASSPHRASE: ${{ secrets.NFPM_CAST_PASSPHRASE }}
       - name: upload artifacts
         if: github.event.pull_request.base.ref == 'main'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: binaries
           path: releases/*.tar.gz
