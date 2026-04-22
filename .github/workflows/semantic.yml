@@ -34,6 +34,6 @@ jobs:
           private_key: ${{ secrets.EKRISTEN_DEV_APP_PEM }}
           revoke: true
       - name: release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v6.0.0
         env:
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
