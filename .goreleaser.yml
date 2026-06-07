@@ -14,8 +14,9 @@ release:
 
     ```bash
     cosign verify-blob \
-      --key https://github.com/ekristen/cast/releases/download/v{{.Version}}/cosign.pub \
-      --signature https://github.com/ekristen/cast/releases/download/v{{.Version}}/cast_v{{.Version}}_linux_amd64.tar.gz.sig \
+      --bundle https://github.com/ekristen/cast/releases/download/v{{.Version}}/cast_v{{.Version}}_linux_amd64.tar.gz.sigstore \
+      --certificate-identity-regexp 'https://github.com/ekristen/cast' \
+      --certificate-oidc-issuer https://token.actions.githubusercontent.com \
       https://github.com/ekristen/cast/releases/download/v{{.Version}}/cast_v{{.Version}}_linux_amd64.tar.gz
     ```
   prerelease: auto
@@ -49,25 +50,31 @@ builds:
             - QUILL_LOG_FILE=/tmp/quill-{{ .Target }}.log
 archives:
   - id: cast
-    builds:
+    ids:
       - cast
     name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ .Arm }}"
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
 signs:
   - ids:
       - default
-      - darwin
     cmd: cosign
-    signature: "${artifact}.sig"
-    certificate: "${artifact}.pem"
-    args: ["sign-blob", "--yes", "--oidc-provider=github", "--oidc-issuer=https://token.actions.githubusercontent.com", "--output-certificate=${certificate}", "--output-signature=${signature}", "${artifact}"]
+    signature: "${artifact}.sigstore"
+    args:
+      [
+        "sign-blob",
+        "--yes",
+        "--oidc-provider=github",
+        "--bundle=${signature}",
+        "${artifact}",
+      ]
     artifacts: all
 nfpms:
   - id: cast
     package_name: cast
-    builds:
+    ids:
       - cast
     vendor: ekristen.dev
     file_name_template: "{{ .PackageName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}-{{ . }}{{ end }}"
