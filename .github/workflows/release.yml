@@ -65,7 +65,7 @@ jobs:
       - name: set goreleaser args renovate
         if: startsWith(github.ref, 'refs/heads/renovate') == true
         run: |
-          echo "GORELEASER_ARGS=--snapshot --skip-publish" >> $GITHUB_ENV
+          echo "GORELEASER_ARGS=--snapshot --skip publish --skip sign" >> $GITHUB_ENV
       - name: setup-quill
         uses: 1password/load-secrets-action@v4
         # Extra Safeguard - This ensures the secrets are only loaded on tag and a tag that the repo owner triggered
