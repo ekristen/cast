@@ -701,6 +701,8 @@ github.com/ProtonMail/gopenpgp/v2 v2.10.0 h1:llCzLvntC9+iH+if/na4AgKTef/Zm4vpaRr
 github.com/ProtonMail/gopenpgp/v2 v2.10.0/go.mod h1:dc0h9Pg3ftfN0U4pfRzujilfh61A2R52wgMkZWcWm2I=
 github.com/ProtonMail/gopenpgp/v2 v2.11.0 h1:UKe23J4y0RLSquC0Zs3hDoYp+hPdZ107kafa0kgoI8s=
 github.com/ProtonMail/gopenpgp/v2 v2.11.0/go.mod h1:yWyFrTu87WwVgtYsRgNmqbesz0nNYFS4CtldtB3lM68=
+github.com/ProtonMail/gopenpgp/v2 v2.11.1 h1:Pr1AF5CZZ/iEvZeLQkNCu5aQcUZaPVrzjgVpdfbTUhM=
+github.com/ProtonMail/gopenpgp/v2 v2.11.1/go.mod h1:yWyFrTu87WwVgtYsRgNmqbesz0nNYFS4CtldtB3lM68=
 github.com/PuerkitoBio/goquery v1.5.0/go.mod h1:qD2PgZ9lccMbQlc7eEOjaeRlFQON7xY8kdmcsrnKqMg=
 github.com/PuerkitoBio/purell v1.0.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/purell v1.1.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
