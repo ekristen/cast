@@ -1,7 +1,6 @@
 package installer
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -18,6 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/ekristen/cast/pkg/saltstack"
+	"github.com/ekristen/cast/pkg/utils"
 )
 
 type Mode int
@@ -206,7 +206,7 @@ func (i *Installer) runSaltstack() error {
 	}
 
 	teeStderr := io.TeeReader(stderr, logFile)
-	scanner := bufio.NewScanner(teeStderr)
+	scanner := utils.NewOutputScanner(teeStderr)
 
 	done := make(chan struct{})
 
@@ -309,6 +309,19 @@ func (i *Installer) runSaltstack() error {
 			}
 		}
 
+		if err := scanner.Err(); err != nil {
+			i.log.WithError(err).Warn("stopped parsing salt-call output, still reading it into the log")
+		}
+		// Keep reading until salt-call closes stderr. If the scanner stopped
+		// early, salt-call would otherwise block writing to a full pipe while
+		// cmd.Wait below waits for it to exit.
+		if err := utils.DrainOutput(teeStderr); err != nil {
+			// Writing the log failed, such as on a full disk. Read the pipe
+			// directly so salt-call can still finish.
+			i.log.WithError(err).Warn("unable to log the rest of salt-call output")
+			_ = utils.DrainOutput(stderr)
+		}
+
 		i.log.Debug("signaling stderr read is complete")
 		done <- struct{}{}
 	}()
@@ -353,7 +366,7 @@ func (i *Installer) runSaltstack() error {
 
 		i.log.Warn(out.String())
 
-		return fmt.Errorf(out.String())
+		return fmt.Errorf("%s", out.String())
 	// This is hit when we kill salt-call because of a signals
 	// handler trap on the main cli process
 	case code == -1:
