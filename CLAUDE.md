@@ -22,7 +22,7 @@ Cast is a Go CLI that wraps SaltStack to install "Cast-compatible" distributions
 
 ### The `install` pipeline (`pkg/commands/install/install.go`)
 1. Resolve the argument: if the path exists on disk it's a local distro, otherwise it's parsed as `owner/repo[@version]` or an alias (`sift`, `remnux`). Aliases are hardcoded in `pkg/distro/aliases.go` and are intentionally limited to backwards-compat for SIFT/REMnux — new aliases should not be added.
-2. `distro.NewGitHub` / `distro.NewLocal` both return the `distro.Distro` interface defined in `pkg/distro/distro.go`. For GitHub distros this downloads the release archive, verifies cosign (and optionally legacy PGP) signatures, and parses the `manifest.yaml`. v1 releases (SIFT/REMnux) embed hardcoded manifests from `pkg/distro/aliases.go`; v2 releases ship their own `manifest.yaml`.
+2. `distro.NewGitHub` / `distro.NewLocal` both return the `distro.Distro` interface defined in `pkg/distro/distro.go`. For GitHub distros this downloads the release archive, verifies cosign (and optionally legacy PGP) signatures, and parses the `manifest.yml`. v1 releases (SIFT/REMnux) embed hardcoded manifests from `pkg/distro/aliases.go`; v2 releases ship their own `manifest.yml`.
 3. Pillar templates with a `_template` suffix (e.g. `sift_user_template`) are rendered through Go `html/template` + sprig in `Manifest.Render` — the resulting key drops the suffix (`sift_user`). `--variable KEY=VAL` CLI flags feed the template context along with `User` (from `--user` / `$SUDO_USER`).
 4. `pkg/installer` then invokes `salt-call` locally. Currently only `--saltstack-install-mode=package` is supported — the code rejects other modes. Output is streamed, regex-parsed to surface state start/completion, and results YAML is written to the cache.
 5. Successful installs persist `{distro, version, mode}` to `~/.config/cast/state.yaml` via `pkg/state`, so re-running `cast install` without `--mode` reuses the previous selection.
@@ -44,6 +44,6 @@ Spins up a Docker container (default image `ghcr.io/ekristen/cast-tools/saltstac
 ## Cast distro concepts (relevant when changing distro/release logic)
 
 - A **v1 distro** is SIFT/REMnux-style: states live under a subdirectory matching `base_dir`, releases use PGP signing, manifests are not shipped with the release.
-- A **v2 distro** places states at the repo root (to enable `git submodule` inclusion), ships a `manifest.yaml` asset, and uses cosign signatures. `cast release` produces v2.
+- A **v2 distro** places states at the repo root (to enable `git submodule` inclusion), ships a `manifest.yml` asset, and uses cosign signatures. `cast release` produces v2.
 - **Modes** are named aliases for SLS targets (e.g. mode `server` → state `sift.server`); a manifest declares one default. Deprecated modes carry a `replacement` field.
 - See `docs/distro.md` and `docs/migrate.md` for the authoring spec — keep these in sync if you change manifest fields.

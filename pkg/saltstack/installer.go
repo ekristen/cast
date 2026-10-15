@@ -27,7 +27,6 @@ type Mode int
 
 const (
 	Package Mode = iota
-	Binary
 	OneDir
 )
 
@@ -109,8 +108,6 @@ func (i *Installer) Run(ctx context.Context) error {
 	}
 
 	switch i.Mode {
-	case Binary:
-		return fmt.Errorf("binary mode no longer supported")
 	case Package:
 		return i.installPackage(ctx, metadata)
 	case OneDir:

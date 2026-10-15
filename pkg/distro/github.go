@@ -46,7 +46,7 @@ import (
 // -- archive.tar.gz.sha256.asc (gpg)
 
 // Release is made up of v1
-// - manifest.yaml
+// - manifest.yml
 // - archive.tar.gz
 // - archive.tar.gz.sha256
 // - archive.tar.gz.sha256.sig (cosign)
@@ -118,7 +118,6 @@ func NewGitHub(ctx context.Context, distro string, version *string,
 			&oauth2.Token{AccessToken: githubToken},
 		)
 		d.http = oauth2.NewClient(d.ctx, ts)
-		d.github = github.NewClient(d.http)
 
 		d.dlHttp = &http.Client{
 			Transport: &transport{token: githubToken, underlyingTransport: http.DefaultTransport},
@@ -126,9 +125,14 @@ func NewGitHub(ctx context.Context, distro string, version *string,
 	} else {
 		logrus.Warn("using unauthenticated github client, could result in API rate limiting")
 		d.http = httputil.NewClient()
-		d.github = github.NewClient(d.http)
 		d.dlHttp = httputil.NewClient()
 	}
+
+	gh, err := github.NewClient(github.WithHTTPClient(d.http))
+	if err != nil {
+		return nil, err
+	}
+	d.github = gh
 
 	d.log = logrus.WithField("component", "distro").WithField("owner", d.Owner).WithField("repo", d.Repo)
 
@@ -162,7 +166,7 @@ func (d *GitHubDistro) GetRelease() *github.RepositoryRelease {
 }
 
 func (d *GitHubDistro) GetReleaseName() string {
-	return *d.selected.TagName
+	return d.selected.GetTagName()
 }
 
 func (d *GitHubDistro) GetReleaseAssets() []*github.ReleaseAsset {
@@ -453,7 +457,7 @@ func (d *GitHubDistro) fetchReleases(ctx context.Context) error {
 	var filteredReleases = make([]*github.RepositoryRelease, 0)
 
 	for _, r := range allReleases {
-		if !d.IncludePreReleases && r.Prerelease == github.Bool(true) {
+		if !d.IncludePreReleases && r.GetPrerelease() {
 			continue
 		}
 

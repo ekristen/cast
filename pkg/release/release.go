@@ -116,7 +116,11 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 			&oauth2.Token{AccessToken: runConfig.GitHubToken},
 		)
 
-		gh = github.NewClient(oauth2.NewClient(ctx, ts))
+		var err error
+		gh, err = github.NewClient(github.WithHTTPClient(oauth2.NewClient(ctx, ts)))
+		if err != nil {
+			return err
+		}
 		dl = &http.Client{
 			Transport: &transport{token: runConfig.GitHubToken, underlyingTransport: http.DefaultTransport},
 		}
@@ -135,10 +139,10 @@ func Run(ctx context.Context, runConfig *RunConfig) (err error) {
 		return fmt.Errorf("release already exists, use --overwrite to delete the release first")
 	}
 
-	releaseOpts := &github.RepositoryRelease{
-		TagName:    github.String(runConfig.Tag),
-		Name:       github.String(runConfig.Tag),
-		Prerelease: github.Bool(v.Prerelease() != ""),
+	releaseOpts := github.CreateReleaseRequest{
+		TagName:    runConfig.Tag,
+		Name:       github.Ptr(runConfig.Tag),
+		Prerelease: github.Ptr(v.Prerelease() != ""),
 	}
 
 	log.Debug("release config", releaseOpts)
