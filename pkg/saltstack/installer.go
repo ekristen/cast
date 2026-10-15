@@ -1,7 +1,6 @@
 package saltstack
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"crypto/sha256"
@@ -311,11 +310,18 @@ func (i *Installer) runCommand(ctx context.Context, command string, args ...stri
 		glogger.Warnf("%s killed", command)
 	}()
 
-	scanner := bufio.NewScanner(stdout)
+	scanner := utils.NewOutputScanner(stdout)
 	for scanner.Scan() {
 		pre := scanner.Text()
 		pre = strings.TrimPrefix(pre, "# ")
 		logger.Trace(pre)
+	}
+	if err := scanner.Err(); err != nil {
+		logger.WithError(err).Warn("stopped logging command output")
+	}
+	// Keep reading so the command can't block on a full pipe before cmd.Wait.
+	if err := utils.DrainOutput(stdout); err != nil {
+		logger.WithError(err).Warn("unable to read the rest of command output")
 	}
 
 	if waitErr := cmd.Wait(); waitErr != nil {
