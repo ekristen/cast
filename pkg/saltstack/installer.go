@@ -295,15 +295,23 @@ func (i *Installer) runCommand(ctx context.Context, command string, args ...stri
 		return startErr
 	}
 
+	// Kill the command if ctx ends first. The goroutine exits once the
+	// command does, so a later cancel can't touch a finished process.
+	exited := make(chan struct{})
+	defer close(exited)
 	go func() {
-		<-ctx.Done()
+		select {
+		case <-exited:
+			return
+		case <-ctx.Done():
+		}
 
 		glogger := i.log.WithField("pid", cmd.Process.Pid)
 
 		glogger.Warnf("parent context signaled done, killing %s process", command)
 
 		if err := cmd.Process.Kill(); err != nil {
-			glogger.Fatal(err)
+			glogger.WithError(err).Warnf("unable to kill %s", command)
 			return
 		}
 

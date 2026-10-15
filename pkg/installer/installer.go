@@ -208,7 +208,9 @@ func (i *Installer) runSaltstack() error {
 	teeStderr := io.TeeReader(stderr, logFile)
 	scanner := utils.NewOutputScanner(teeStderr)
 
-	done := make(chan struct{})
+	// Buffered so the reader goroutine can finish even if cmd.Start fails and
+	// nothing waits on done.
+	done := make(chan struct{}, 1)
 
 	/*
 		go func() {
