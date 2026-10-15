@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	logtest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,12 +36,11 @@ func TestRunSaltstackSurvivesLongOutputLine(t *testing.T) {
 	// Cancelling the context kills a hung fake salt-call when the test ends.
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	hook := logtest.NewGlobal()
-	t.Cleanup(hook.Reset)
+	logger, hook := logtest.NewNullLogger()
 
 	i := &Installer{
 		ctx:     ctx,
-		log:     logrus.WithField("component", "installer"),
+		log:     logger.WithField("component", "installer"),
 		config:  &Config{SaltStackLogLevel: "info", SaltStackState: "test"},
 		logFile: filepath.Join(dir, "saltstack.log"),
 		outFile: filepath.Join(dir, "results.yaml"),
@@ -54,7 +52,8 @@ func TestRunSaltstackSurvivesLongOutputLine(t *testing.T) {
 	select {
 	case err := <-done:
 		assert.NoError(t, err)
-	case <-time.After(60 * time.Second):
+	// Well under the 60s package timeout CI uses, so a hang fails here.
+	case <-time.After(15 * time.Second):
 		t.Fatal("runSaltstack hung on a long salt-call output line")
 	}
 

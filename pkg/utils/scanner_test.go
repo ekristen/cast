@@ -22,13 +22,14 @@ func scanAll(t *testing.T, r io.Reader) []string {
 	return lines
 }
 
-func TestScanLinesOrCR(t *testing.T) {
+func TestScanLinesCollapseCR(t *testing.T) {
 	cases := map[string][]string{
 		"a\nb\r\nc":                 {"a", "b", "c"},
-		"a\rb\r\n\n":                {"a", "b", ""},
-		"spin /\rspin -\rdone\n":    {"spin /", "spin -", "done"},
+		"a\rb\r\n\n":                {"b", ""},
+		"spin /\rspin -\rdone\n":    {"done"},
 		"ends with a carriage\r":    {"ends with a carriage"},
 		"\r\n\r\n":                  {"", ""},
+		"text\r\r\nnext\n":          {"text", "next"},
 		"last line without newline": {"last line without newline"},
 	}
 	for input, want := range cases {
@@ -39,19 +40,34 @@ func TestScanLinesOrCR(t *testing.T) {
 }
 
 // A spinner that redraws one line with "\r" for a long time used to produce a
-// single line over bufio's 64 KB limit, which stopped the scanner.
+// single line over bufio's 64 KB limit, which stopped the scanner. Its frames
+// now collapse into the text that follows the last one.
 func TestOutputScannerSpinner(t *testing.T) {
 	spinner := strings.Repeat("Ensure prerequisites for \"firefox\" are available /\r", 25000)
 	input := spinner + "after the spinner\n# [INFO    ] Completed state [firefox]\n"
 	assert.Greater(t, len(spinner), MaxOutputLine)
 
 	lines := scanAll(t, strings.NewReader(input))
-	assert.Equal(t, 25002, len(lines))
-	assert.Equal(t, "# [INFO    ] Completed state [firefox]", lines[len(lines)-1])
+	assert.Equal(t, []string{"after the spinner", "# [INFO    ] Completed state [firefox]"}, lines)
 }
 
-// The scanner stops at a line over MaxOutputLine. DrainOutput must keep reading
-// so the writer, standing in for salt-call, never blocks on a full pipe.
+// A line over MaxOutputLine is split into pieces, and the lines after it are
+// still scanned.
+func TestOutputScannerLongLine(t *testing.T) {
+	input := strings.Repeat("x", 2*MaxOutputLine) + "\nafter\n" + strings.Repeat("y", MaxOutputLine+10)
+	lines := scanAll(t, strings.NewReader(input))
+	assert.Equal(t, []string{
+		strings.Repeat("x", MaxOutputLine),
+		strings.Repeat("x", MaxOutputLine),
+		"",
+		"after",
+		strings.Repeat("y", MaxOutputLine),
+		"yyyyyyyyyy",
+	}, lines)
+}
+
+// If the scanner stops early, DrainOutput must keep reading so the writer,
+// standing in for salt-call, never blocks on a full pipe.
 func TestDrainOutputUnblocksWriter(t *testing.T) {
 	r, w := io.Pipe()
 	t.Cleanup(func() {
@@ -66,26 +82,20 @@ func TestDrainOutputUnblocksWriter(t *testing.T) {
 		written <- err
 	}()
 
-	read := make(chan error, 2)
+	read := make(chan error, 1)
 	go func() {
-		scanner := NewOutputScanner(r)
-		for scanner.Scan() {
-		}
-		read <- scanner.Err()
+		// Read one line, then stop the way a scanner error would.
+		scanner := bufio.NewScanner(r)
+		scanner.Scan()
 		read <- DrainOutput(r)
 	}()
 
 	timeout := time.After(10 * time.Second)
-	for _, check := range []func(error){
-		func(err error) { assert.ErrorIs(t, err, bufio.ErrTooLong) },
-		func(err error) { assert.NoError(t, err) },
-	} {
-		select {
-		case err := <-read:
-			check(err)
-		case <-timeout:
-			t.Fatal("reading the output hung")
-		}
+	select {
+	case err := <-read:
+		assert.NoError(t, err)
+	case <-timeout:
+		t.Fatal("reading the output hung")
 	}
 	select {
 	case err := <-written:
