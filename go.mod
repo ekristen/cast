@@ -10,7 +10,7 @@ require (
 	github.com/ProtonMail/gopenpgp/v2 v2.11.1
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/ekristen/go-checkpoint v0.0.0-20251214165753-5912ae8f4d4a
-	github.com/google/go-github/v80 v80.0.0
+	github.com/google/go-github/v92 v92.0.0
 	github.com/mholt/archives v0.1.5
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/otiai10/copy v1.14.1
@@ -96,7 +96,7 @@ require (
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.21.6 // indirect
 	github.com/google/go-github/v73 v73.0.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
